@@ -11,7 +11,6 @@
         :root { --primary: #6c5ce7; --bg: #0f172a; --white: #ffffff; --danger: #ff4757; --success: #2ed573; --card: #1e293b; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: white; margin: 0; overflow-x: hidden; }
         
-        /* تنسيق خلفية هادئة */
         #matrixCanvas {
             position: fixed;
             top: 0;
@@ -20,7 +19,11 @@
             height: 100%;
             z-index: -1;
             background: var(--bg);
+            transition: opacity 0.5s;
         }
+
+        /* زر إخفاء الماتريكس */
+        .toggle-matrix { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 5px 10px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; margin-left: 10px; }
 
         #loginScreen { display: flex; align-items: center; justify-content: center; height: 100vh; position: relative; }
         .login-card { background: rgba(30, 41, 59, 0.9); padding: 30px; border-radius: 20px; width: 90%; max-width: 350px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #334155; }
@@ -67,13 +70,17 @@
             <input type="text" id="roomCodeInput" placeholder="رمز الغرفة">
             <button class="btn-action join-btn" onclick="startApp('join')">دخول</button>
             <button class="btn-action create-btn" onclick="startApp('create')">إنشاء غرفة</button>
+            <button class="toggle-matrix" onclick="toggleMatrix()" style="margin-top: 15px; width: 100%;">تشغيل/إيقاف الخلفية ✨</button>
         </div>
     </div>
 
     <div id="gameScreen">
         <div class="header-nav">
             <div class="nav-top">
-                <span id="roomDisplay">غرفة: #----</span>
+                <div>
+                    <span id="roomDisplay">غرفة: #----</span>
+                    <button class="toggle-matrix" onclick="toggleMatrix()">✨</button>
+                </div>
                 <button class="logout-btn" onclick="logout()">خروج 🚪</button>
             </div>
             <div id="playerList" class="player-list"></div>
@@ -103,7 +110,13 @@
     <audio id="audioBuzzer" src="https://www.soundjay.com/buttons/sounds/button-37.mp3"></audio>
 
 <script>
-    // --- كود الخلفية الهادئة جداً ---
+    // --- التحكم بالخلفية ---
+    let matrixEnabled = true;
+    function toggleMatrix() {
+        matrixEnabled = !matrixEnabled;
+        document.getElementById('matrixCanvas').style.opacity = matrixEnabled ? "1" : "0";
+    }
+
     const canvas = document.getElementById('matrixCanvas');
     const ctx = canvas.getContext('2d');
     canvas.height = window.innerHeight;
@@ -111,35 +124,22 @@
 
     const characters = ['?'];
     const fontSize = 18;
-    // تقليل عدد الأعمدة للنصف لراحة العين
     const columns = (canvas.width / fontSize) / 2; 
     const drops = [];
 
-    for (let i = 0; i < columns; i++) {
-        drops[i] = Math.random() * -100;
-    }
+    for (let i = 0; i < columns; i++) { drops[i] = Math.random() * -100; }
 
     function drawMatrix() {
-        // جعل الطبقة المغطية شفافة جداً ليكون التأثير ناعماً
+        if(!matrixEnabled) return; // توقف الرسم إذا تم تعطيلها
         ctx.fillStyle = 'rgba(15, 23, 42, 0.15)'; 
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        // لون باهت (شفافية منخفضة) لعلامة الاستفهام
         ctx.fillStyle = 'rgba(108, 92, 231, 0.2)'; 
         
         for (let i = 0; i < drops.length; i++) {
-            // تباين أحجام عشوائي
             const randomSize = fontSize + (Math.sin(i) * 6);
             ctx.font = randomSize + 'px monospace';
-            
-            const text = characters[0];
-            // توزيع الأعمدة بمسافات أكبر
-            ctx.fillText(text, i * (fontSize * 2), drops[i] * fontSize);
-
-            if (drops[i] * fontSize > canvas.height && Math.random() > 0.98) {
-                drops[i] = 0;
-            }
-            // سرعة بطيئة وانسيابية
+            ctx.fillText(characters[0], i * (fontSize * 2), drops[i] * fontSize);
+            if (drops[i] * fontSize > canvas.height && Math.random() > 0.98) { drops[i] = 0; }
             drops[i] += 0.5; 
         }
     }
@@ -150,7 +150,7 @@
         canvas.width = window.innerWidth;
     });
 
-    // --- كود Firebase والوظائف ---
+    // --- كود Firebase ---
     const firebaseConfig = {
         apiKey: "AIzaSyCp3On2Z1xFeZrIQlOsQvsIoGHaGnFvmBw",
         authDomain: "buzzergame-f59e4.firebaseapp.com",
