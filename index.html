@@ -22,7 +22,6 @@
             transition: opacity 0.5s;
         }
 
-        /* زر إخفاء الماتريكس */
         .toggle-matrix { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 5px 10px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; margin-left: 10px; }
 
         #loginScreen { display: flex; align-items: center; justify-content: center; height: 100vh; position: relative; }
@@ -130,11 +129,10 @@
     for (let i = 0; i < columns; i++) { drops[i] = Math.random() * -100; }
 
     function drawMatrix() {
-        if(!matrixEnabled) return; // توقف الرسم إذا تم تعطيلها
+        if(!matrixEnabled) return;
         ctx.fillStyle = 'rgba(15, 23, 42, 0.15)'; 
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = 'rgba(108, 92, 231, 0.2)'; 
-        
         for (let i = 0; i < drops.length; i++) {
             const randomSize = fontSize + (Math.sin(i) * 6);
             ctx.font = randomSize + 'px monospace';
@@ -150,7 +148,7 @@
         canvas.width = window.innerWidth;
     });
 
-    // --- كود Firebase ---
+    // --- كود Firebase ومزامنة الوقت ---
     const firebaseConfig = {
         apiKey: "AIzaSyCp3On2Z1xFeZrIQlOsQvsIoGHaGnFvmBw",
         authDomain: "buzzergame-f59e4.firebaseapp.com",
@@ -164,6 +162,12 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     let myName, myRole, myRoom;
+    
+    // حساب فرق التوقيت بين الجهاز والسيرفر لضمان العدالة
+    let serverTimeOffset = 0;
+    db.ref(".info/serverTimeOffset").on("value", (snap) => {
+        serverTimeOffset = snap.val();
+    });
 
     window.onload = () => {
         const saved = localStorage.getItem('minerva_session');
@@ -234,7 +238,7 @@
             } else {
                 let html = "";
                 clickArray.forEach((c, i) => {
-                    html += `<div class="rank-item"><span>${i+1}. ${c.name}</span><span>${i==0?"الأول!":"+"+((c.time-clickArray[0].time)/1000).toFixed(2)+"s"}</span></div>`;
+                    html += `<div class="rank-item"><span>${i+1}. ${c.name}</span><span>${i==0?"الأول!":"+"+((c.time-clickArray[0].time)/1000).toFixed(3)+"s"}</span></div>`;
                 });
                 container.innerHTML = html;
             }
@@ -256,7 +260,14 @@
     document.getElementById('mainBuzzer').onclick = function() {
         this.disabled = true;
         document.getElementById('audioBuzzer').play();
-        db.ref(`rooms/${myRoom}/clicks`).push({ name: myName, time: firebase.database.ServerValue.TIMESTAMP });
+        
+        // حساب الوقت الحقيقي: وقت الجهاز الحالي + فرق السيرفر
+        const accurateTime = Date.now() + serverTimeOffset;
+        
+        db.ref(`rooms/${myRoom}/clicks`).push({ 
+            name: myName, 
+            time: accurateTime 
+        });
         document.getElementById('statusMsg').innerText = "تم!";
     };
 
