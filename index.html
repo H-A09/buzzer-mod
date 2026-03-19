@@ -14,34 +14,37 @@
         #matrixCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: var(--bg); transition: opacity 0.5s; }
         .toggle-matrix { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 5px 10px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; margin-left: 10px; }
 
-        /* --- تنسيق الشعار الشخصي الذكي --- */
-        .user-logo-container {
+        /* --- تنسيق الشعار الشخصي الاحترافي --- */
+        .minerva-logo-container {
             position: fixed;
-            bottom: 20px;
-            left: 20px;
-            z-index: 50; /* ليكون فوق الخلفية وتحت القوائم المنبثقة */
-            pointer-events: none; /* لا يعيق اللمس أو الضغط خلفه */
+            bottom: 25px;
+            left: 25px;
+            z-index: 100;
+            pointer-events: none;
         }
-        .user-logo-container img {
-            width: 80px; /* الحجم الافتراضي للكمبيوتر */
+        .minerva-logo-container img {
+            width: 85px; /* حجم مثالي للكمبيوتر */
             height: auto;
-            opacity: 0.9;
-            filter: drop-shadow(0 0 8px rgba(108, 92, 231, 0.4));
+            /* تأثيرات لضمان الوضوح ومنع التغبيش */
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+            filter: drop-shadow(0 0 10px rgba(108, 92, 231, 0.6)) brightness(1.2);
             transition: all 0.3s ease;
         }
-        /* تعديل الحجم للجوال */
+
+        /* تعديل الحجم ليتناسب مع الجوال تلقائياً */
         @media (max-width: 600px) {
-            .user-logo-container { bottom: 10px; left: 10px; }
-            .user-logo-container img { width: 50px; opacity: 0.7; }
+            .minerva-logo-container { bottom: 15px; left: 15px; }
+            .minerva-logo-container img { width: 55px; opacity: 0.8; }
         }
 
+        /* باقي التنسيقات كما هي لضمان عدم خربطة الواجهة */
         #loginScreen { display: flex; align-items: center; justify-content: center; height: 100vh; position: relative; }
-        .login-card { background: rgba(30, 41, 59, 0.9); padding: 30px; border-radius: 20px; width: 90%; max-width: 350px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #334155; }
-        
+        .login-card { background: rgba(30, 41, 59, 0.9); padding: 30px; border-radius: 20px; width: 90%; max-width: 350px; text-align: center; border: 1px solid #334155; }
         input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #334155; border-radius: 10px; background: #0f172a; color: white; }
         .btn-action { width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .create-btn { background: var(--success); color: white; }
         .join-btn { background: var(--primary); color: white; }
+        .create-btn { background: var(--success); color: white; }
         
         #gameScreen { display: none; height: 100vh; flex-direction: column; position: relative; }
         .header-nav { width: 100%; background: rgba(30, 41, 59, 0.95); border-bottom: 2px solid var(--primary); }
@@ -58,11 +61,9 @@
         
         .rank-box { width: 100%; max-width: 450px; background: rgba(30, 41, 59, 0.85); border-radius: 15px; padding: 15px; margin-bottom: 10px; border: 1px solid #334155; }
         .rank-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #334155; }
-        
         .chat-area { width: 100%; max-width: 450px; background: rgba(30, 41, 59, 0.85); border-radius: 15px; height: 150px; display: flex; flex-direction: column; border: 1px solid #334155; }
         #chatMessages { flex-grow: 1; padding: 10px; overflow-y: auto; font-size: 0.85rem; text-align: right; }
         #chatInput { border: none; border-top: 1px solid #334155; background: #0f172a; padding: 12px; color: white; border-radius: 0 0 15px 15px; }
-        
         .hidden { display: none !important; }
         .logout-btn { background: #ff4757; color: white; border: none; padding: 5px 12px; border-radius: 8px; cursor: pointer; }
     </style>
@@ -72,8 +73,8 @@
     <canvas id="matrixCanvas"></canvas>
     <div id="countdownOverlay"></div>
 
-    <div class="user-logo-container">
-        <img src="https://raw.githubusercontent.com/H-A09/buzzer-mod/refs/heads/main/My%20Logo.svg" alt="My Logo" onerror="this.parentElement.style.display='none'">
+    <div class="minerva-logo-container">
+        <img src="https://raw.githubusercontent.com/H-A09/buzzer-mod/main/My%20Logo.svg" alt="Minerva Logo">
     </div>
 
     <div id="loginScreen">
@@ -87,7 +88,6 @@
             <input type="text" id="roomCodeInput" placeholder="رمز الغرفة">
             <button class="btn-action join-btn" onclick="startApp('join')">دخول</button>
             <button class="btn-action create-btn" onclick="startApp('create')">إنشاء غرفة</button>
-            <button class="toggle-matrix" onclick="toggleMatrix()" style="margin-top: 15px; width: 100%;">تشغيل/إيقاف الخلفية ✨</button>
         </div>
     </div>
 
@@ -125,32 +125,24 @@
     </div>
 
 <script>
-    /* كود الـ JavaScript لم يتغير لضمان استقرار ميزات الأمان والعداد */
+    /* كود الـ JavaScript للحماية والأداء */
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     let isCountdownActive = false;
 
     function playBuzzerSound() {
         const now = audioCtx.currentTime;
-        const osc1 = audioCtx.createOscillator();
-        const gain1 = audioCtx.createGain();
+        const osc1 = audioCtx.createOscillator(); const gain1 = audioCtx.createGain();
         osc1.type = 'triangle'; osc1.frequency.setValueAtTime(880, now);
         gain1.gain.setValueAtTime(0.3, now); gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
         osc1.connect(gain1); gain1.connect(audioCtx.destination);
         osc1.start(now); osc1.stop(now + 0.2);
-        const osc2 = audioCtx.createOscillator();
-        const gain2 = audioCtx.createGain();
-        osc2.type = 'triangle'; osc2.frequency.setValueAtTime(1046.50, now + 0.15);
-        gain2.gain.setValueAtTime(0.3, now + 0.15); gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
-        osc2.connect(gain2); gain2.connect(audioCtx.destination);
-        osc2.start(now + 0.15); osc2.stop(now + 0.4);
     }
 
     function playResetSound() {
         const now = audioCtx.currentTime;
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
+        const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
         osc.type = 'sine'; osc.frequency.setValueAtTime(200, now);
-        osc.frequency.exponentialRampToValueAtTime(800, now + 2); 
+        osc.frequency.exponentialRampToValueAtTime(800, now + 2);
         gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.2, now + 0.5);
         gain.gain.linearRampToValueAtTime(0, now + 2);
         osc.connect(gain); gain.connect(audioCtx.destination);
@@ -200,26 +192,17 @@
     let serverTimeOffset = 0;
     db.ref(".info/serverTimeOffset").on("value", (snap) => { serverTimeOffset = snap.val(); });
 
-    window.onload = () => {
-        const saved = localStorage.getItem('minerva_session');
-        if(saved) {
-            const s = JSON.parse(saved);
-            document.getElementById('userName').value = s.name;
-            document.getElementById('userRole').value = s.role;
-            document.getElementById('roomCodeInput').value = s.room;
-            startApp('join', true);
-        }
-    };
-
     function startApp(mode, isAuto = false) {
         myName = document.getElementById('userName').value.trim();
         myRole = document.getElementById('userRole').value;
         myRoom = (mode === 'create') ? Math.floor(1000 + Math.random() * 9000).toString() : document.getElementById('roomCodeInput').value.trim();
-        if(!myName || !myRoom) return !isAuto && alert("تأكد من البيانات");
+        if(!myName || !myRoom) return;
+
         localStorage.setItem('minerva_session', JSON.stringify({name: myName, role: myRole, room: myRoom}));
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('gameScreen').style.display = 'flex';
         document.getElementById('roomDisplay').innerText = "غرفة: #" + myRoom;
+
         if(myRole === 'admin') {
             document.getElementById('playerUI').style.display = 'none';
             document.getElementById('adminResetArea').classList.remove('hidden');
@@ -236,6 +219,7 @@
             const players = data.players || {};
             const scores = data.scores || {};
             const clicks = data.clicks || {};
+            
             const list = document.getElementById('playerList');
             list.innerHTML = "";
             Object.values(players).forEach(p => {
@@ -243,6 +227,7 @@
                 let adminBtns = (myRole === 'admin') ? `<button style="background:var(--success); border:none; color:white; border-radius:4px; padding:2px 5px; cursor:pointer;" onclick="modScore('${p.name}', 1)">+</button><button style="background:var(--danger); border:none; color:white; border-radius:4px; padding:2px 5px; cursor:pointer;" onclick="modScore('${p.name}', -1)">-</button>` : "";
                 list.innerHTML += `<div class="player-card"><span>${p.role=='admin'?'👑':'🎮'} ${p.name}</span><div class="score-box">${pScore}</div>${adminBtns}</div>`;
             });
+
             const container = document.getElementById('rankContainer');
             let clickArray = Object.values(clicks).sort((a, b) => a.time - b.time);
             if(clickArray.length === 0) {
@@ -261,15 +246,12 @@
         isCountdownActive = true;
         const overlay = document.getElementById('countdownOverlay');
         const buzzer = document.getElementById('mainBuzzer');
-        buzzer.disabled = true;
-        overlay.style.display = 'block';
-        if (audioCtx.state === 'suspended') audioCtx.resume();
+        buzzer.disabled = true; overlay.style.display = 'block';
         playResetSound();
-        let count = 3;
-        overlay.innerText = count;
+        let count = 3; overlay.innerText = count;
         const interval = setInterval(() => {
             count--;
-            if(count > 0) { overlay.innerText = count; }
+            if(count > 0) overlay.innerText = count;
             else { clearInterval(interval); overlay.style.display = 'none'; isCountdownActive = false; if(myRole === 'player') buzzer.disabled = false; document.getElementById('statusMsg').innerText = "اضغط الآن!"; }
         }, 1000);
     }
@@ -287,7 +269,6 @@
     document.getElementById('mainBuzzer').onclick = function() {
         if(isCountdownActive) return;
         this.disabled = true;
-        if (audioCtx.state === 'suspended') audioCtx.resume();
         playBuzzerSound();
         db.ref(`rooms/${myRoom}/clicks`).push({ name: myName, time: Date.now() + serverTimeOffset });
         document.getElementById('statusMsg').innerText = "تم!";
