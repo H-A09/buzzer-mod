@@ -3,165 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minerva System 2.0</title>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+    <title>Buzzer Online - Firebase</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    
     <style>
-        body { font-family: Arial, sans-serif; background-color: #1a1a2e; color: white; text-align: center; margin: 0; padding: 20px; }
-        .screen { display: none; }
-        .active { display: block; }
-        
-        /* تصميم الواجهة الأولى */
-        .box { background: #16213e; padding: 30px; border-radius: 15px; display: inline-block; margin-top: 50px; border: 2px solid #0f3460; }
-        input, select { padding: 10px; margin: 10px; border-radius: 5px; border: none; width: 80%; }
-        button { padding: 12px 25px; background: #e94560; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        
-        /* واجهة اللعب */
-        .buzzer-btn { width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(#ff4d4d, #990000); border: 8px solid #4d0000; color: white; font-size: 24px; cursor: pointer; box-shadow: 0 10px #660000; margin: 20px auto; display: block; }
-        .buzzer-btn:active { box-shadow: 0 2px #660000; transform: translateY(8px); }
-        
-        table { width: 100%; max-width: 500px; margin: 20px auto; border-collapse: collapse; background: #0f3460; }
-        th, td { padding: 12px; border: 1px solid #16213e; }
-        
-        /* الدردشة الجانبية */
-        #chat { position: fixed; bottom: 10px; left: 10px; width: 200px; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 10px; text-align: right; font-size: 12px; }
-        #messages { height: 100px; overflow-y: auto; margin-bottom: 5px; }
+        :root { --primary: #6c5ce7; --bg: #f0f2f5; --white: #ffffff; --danger: #ff4757; --success: #2ed573; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; }
+        #loginScreen { display: flex; align-items: center; justify-content: center; height: 100vh; background: linear-gradient(135deg, #6c5ce7, #a29bfe); }
+        .login-card { background: var(--white); padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 320px; text-align: center; }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 2px solid #ddd; border-radius: 10px; box-sizing: border-box; }
+        .btn-action { width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .create-btn { background: var(--success); color: white; }
+        .join-btn { background: var(--primary); color: white; }
+        #gameScreen { display: none; height: 100vh; flex-direction: row; }
+        .sidebar { width: 250px; background: var(--white); border-left: 4px solid var(--primary); display: flex; flex-direction: column; }
+        .sidebar-header { padding: 15px; background: var(--primary); color: white; font-weight: bold; text-align: center; }
+        .player-list { flex-grow: 1; padding: 15px; overflow-y: auto; }
+        .player-card { background: #f1f2f6; padding: 10px; margin-bottom: 8px; border-radius: 8px; display: flex; justify-content: space-between; border-right: 4px solid #ccc; }
+        .main-play { flex-grow: 1; display: flex; flex-direction: column; align-items: center; padding: 20px; position: relative; }
+        .room-badge { position: absolute; top: 20px; right: 20px; background: #dfe6e9; padding: 5px 15px; border-radius: 20px; font-weight: bold; color: var(--primary); }
+        .buzzer-btn { width: 220px; height: 220px; background: var(--danger); color: white; border: none; border-radius: 50%; font-size: 2rem; font-weight: bold; box-shadow: 0 12px #b33939; cursor: pointer; transition: 0.1s; margin-top: 40px; }
+        .buzzer-btn:active { transform: translateY(8px); box-shadow: 0 4px #b33939; }
+        .buzzer-btn:disabled { background: #ccc; box-shadow: 0 8px #999; cursor: not-allowed; }
+        .rank-box { width: 100%; max-width: 450px; background: white; border-radius: 15px; padding: 20px; margin-top: 30px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .rank-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee; }
+        .btn-reset { padding: 15px 50px; background: var(--success); color: white; border: none; border-radius: 30px; font-weight: bold; cursor: pointer; margin-top: 20px; box-shadow: 0 4px #21a455; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <div id="setup-screen" class="screen active">
-        <div class="box">
-            <h2>MINERVA SYSTEM 2.0</h2>
-            <input type="text" id="username" placeholder="أدخل اسمك هنا...">
-            <select id="user-role">
-                <option value="player">لاعب (Player)</option>
-                <option value="admin">أدمن (Admin)</option>
+    <div id="loginScreen">
+        <div class="login-card">
+            <h2 style="color: var(--primary);">Buzzer Online</h2>
+            <input type="text" id="userName" placeholder="اسمك المستعار">
+            <select id="userRole">
+                <option value="player">أنا لاعب</option>
+                <option value="admin">أنا أدمن</option>
             </select>
-            <input type="text" id="room-id" placeholder="اسم الغرفة (مثال: game1)">
-            <br>
-            <button onclick="joinGame()">دخول اللعبة</button>
+            <input type="text" id="roomCodeInput" placeholder="أدخل رمز الغرفة">
+            <button class="btn-action join-btn" onclick="startApp('join')">دخول / انضمام</button>
+            <div style="margin: 10px 0; color: #888;">أو</div>
+            <button class="btn-action create-btn" onclick="startApp('create')">إنشاء غرفة جديدة عشوائية</button>
         </div>
     </div>
 
-    <div id="game-screen" class="screen">
-        <h3 id="display-room">الغرفة: --</h3>
-        <p id="display-name">المستخدم: --</p>
-        
-        <button id="buzzer" class="buzzer-btn" onclick="pressBuzzer()">اضغط!</button>
-
-        <h3>ترتيب المتسابقين</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>الترتيب</th>
-                    <th>الاسم</th>
-                    <th>الزمن</th>
-                    <th>النقاط</th>
-                    <th id="admin-col" style="display:none">تحكم</th>
-                </tr>
-            </thead>
-            <tbody id="results"></tbody>
-        </table>
-
-        <div id="admin-controls" style="display:none; margin-top:20px;">
-            <button onclick="resetRoom()" style="background:#533483">إعادة ضبط الغرفة (Reset)</button>
+    <div id="gameScreen">
+        <div class="sidebar">
+            <div class="sidebar-header">المتواجدون</div>
+            <div id="playerList" class="player-list"></div>
+        </div>
+        <div class="main-play">
+            <div id="roomDisplay" class="room-badge">غرفة: #----</div>
+            <h3 id="statusMsg" style="margin-top: 60px;">استعد للضغط!</h3>
+            <button id="mainBuzzer" class="buzzer-btn">اضغط!</button>
+            <div class="rank-box">
+                <strong>نتائج الجولة:</strong>
+                <div id="rankContainer" style="margin-top:10px;">بانتظار المتسابقين...</div>
+            </div>
+            <div id="adminArea" class="hidden">
+                <button class="btn-reset" onclick="triggerReset()">إعادة تعيين (Reset) 🔄</button>
+            </div>
         </div>
     </div>
 
-    <div id="chat">
-        <div id="messages"></div>
-        <input type="text" id="msg-input" placeholder="دردشة..." style="width:90%">
-    </div>
+<script>
+    // إعدادات Firebase الخاصة بك المدمجة
+    const firebaseConfig = {
+        apiKey: "AIzaSyCp3On2Z1xFeZrIQlOsQvsIoGHaGnFvmBw",
+        authDomain: "buzzergame-f59e4.firebaseapp.com",
+        projectId: "buzzergame-f59e4",
+        databaseURL: "https://buzzergame-f59e4-default-rtdb.firebaseio.com/",
+        storageBucket: "buzzergame-f59e4.firebasestorage.app",
+        messagingSenderId: "833301631932",
+        appId: "1:833301631932:web:4dbe69851ec3d5125051b9",
+        measurementId: "G-MB3DWXL8NN"
+    };
 
-    <audio id="sound-buzzer" src="https://assets.mixkit.co/active_storage/sfx/2958/2958-preview.mp3"></audio>
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    let myName, myRole, myRoom;
 
-    <script>
-        // رابط قاعدة بياناتك
-        const firebaseConfig = { databaseURL: "https://buzzergame-f59e4-default-rtdb.firebaseio.com/" };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+    function startApp(mode) {
+        myName = document.getElementById('userName').value;
+        if(!myName) return alert("اكتب اسمك أولاً");
 
-        let currentRoom = "";
-        let myName = "";
-        let role = "";
-
-        function joinGame() {
-            myName = document.getElementById('username').value;
-            currentRoom = document.getElementById('room-id').value || "public";
-            role = document.getElementById('user-role').value;
-
-            if (!myName) { alert("من فضلك أدخل اسمك"); return; }
-
-            document.getElementById('setup-screen').classList.remove('active');
-            document.getElementById('game-screen').classList.add('active');
-            document.getElementById('display-room').innerText = "الغرفة: " + currentRoom;
-            document.getElementById('display-name').innerText = "اللاعب: " + myName;
-
-            if (role === 'admin') {
-                document.getElementById('admin-controls').style.display = 'block';
-                document.getElementById('admin-col').style.display = 'table-cell';
-            }
-
-            listenToRoom();
+        if(mode === 'create') {
+            myRoom = Math.floor(1000 + Math.random() * 9000).toString();
+        } else {
+            myRoom = document.getElementById('roomCodeInput').value;
+            if(!myRoom) return alert("أدخل رمز الغرفة");
         }
 
-        function pressBuzzer() {
-            const time = Date.now();
-            document.getElementById('sound-buzzer').play();
-            // تسجيل الضغطة للجميع، الترتيب سيتم برمجياً بالأسفل
-            db.ref('rooms/' + currentRoom + '/presses').push({
-                name: myName,
-                time: time
+        myRole = document.getElementById('userRole').value;
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('gameScreen').style.display = 'flex';
+        document.getElementById('roomDisplay').innerText = "غرفة: #" + myRoom;
+
+        if(myRole === 'admin') {
+            document.getElementById('adminArea').classList.remove('hidden');
+            document.getElementById('mainBuzzer').classList.add('hidden');
+        }
+
+        const playerRef = db.ref(`rooms/${myRoom}/players`).push();
+        playerRef.set({ name: myName, role: myRole });
+        playerRef.onDisconnect().remove();
+
+        listenToRoom();
+    }
+
+    function listenToRoom() {
+        db.ref(`rooms/${myRoom}/players`).on('value', snap => {
+            const list = document.getElementById('playerList');
+            list.innerHTML = "";
+            snap.forEach(child => {
+                const p = child.val();
+                list.innerHTML += `<div class="player-card"><span>${p.name}</span><span>${p.role=='admin'?'👑':'🎮'}</span></div>`;
             });
-            // قفل الزر محلياً فقط لمنع السبام الزائد
-            document.getElementById('buzzer').disabled = true;
-            setTimeout(() => { document.getElementById('buzzer').disabled = false; }, 1000);
-        }
-
-        function listenToRoom() {
-            db.ref('rooms/' + currentRoom + '/presses').on('value', (snap) => {
-                const list = document.getElementById('results');
-                list.innerHTML = "";
-                let data = [];
-                snap.forEach(child => { data.push(child.val()); });
-
-                // الترتيب بالأسرع (الزمن الأقل)
-                data.sort((a, b) => a.time - b.time);
-
-                data.forEach((p, index) => {
-                    let diff = index === 0 ? "الأول!" : "+" + ((p.time - data[0].time)/1000).toFixed(3) + "s";
-                    list.innerHTML += `<tr>
-                        <td>${index + 1}</td>
-                        <td>${p.name}</td>
-                        <td>${diff}</td>
-                        <td id="score-${p.name}">0</td>
-                        ${role==='admin' ? `<td><button onclick="addPoint('${p.name}')">+1</button></td>` : ""}
-                    </tr>`;
-                });
-            });
-        }
-
-        function addPoint(name) {
-            db.ref('rooms/' + currentRoom + '/scores/' + name).transaction(s => (s || 0) + 1);
-        }
-
-        function resetRoom() {
-            db.ref('rooms/' + currentRoom + '/presses').remove();
-        }
-
-        // الدردشة البسيطة
-        document.getElementById('msg-input').onkeypress = (e) => {
-            if (e.key === 'Enter') {
-                db.ref('rooms/' + currentRoom + '/chat').push(myName + ": " + e.target.value);
-                e.target.value = "";
-            }
-        };
-        db.ref('rooms/' + currentRoom + '/chat').limitToLast(5).on('child_added', (s) => {
-            const div = document.createElement('div');
-            div.innerText = s.val();
-            document.getElementById('messages').appendChild(div);
         });
-    </script>
+
+        db.ref(`rooms/${myRoom}/clicks`).on('value', snap => {
+            const container = document.getElementById('rankContainer');
+            if(!snap.exists()) {
+                container.innerHTML = "بانتظار المتسابقين...";
+                document.getElementById('mainBuzzer').disabled = false;
+                document.getElementById('statusMsg').innerText = "استعد للضغط!";
+                return;
+            }
+            
+            let html = "";
+            let clicks = [];
+            snap.forEach(child => { clicks.push(child.val()); });
+            clicks.sort((a, b) => a.time - b.time); 
+            
+            clicks.forEach((c, index) => {
+                html += `<div class="rank-item"><span>${index+1}. ${c.name}</span><span>${((c.time - clicks[0].time)/1000).toFixed(2)}s+</span></div>`;
+            });
+            container.innerHTML = html;
+        });
+    }
+
+    document.getElementById('mainBuzzer').onclick = function() {
+        this.disabled = true;
+        db.ref(`rooms/${myRoom}/clicks`).push({
+            name: myName,
+            time: firebase.database.ServerValue.TIMESTAMP
+        });
+        document.getElementById('statusMsg').innerText = "تم تسجيل ضغطتك!";
+    };
+
+    function triggerReset() {
+        db.ref(`rooms/${myRoom}/clicks`).remove();
+    }
+</script>
 </body>
 </html>
