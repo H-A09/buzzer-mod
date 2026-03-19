@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minerva System</title>
+    <title>Minerva System 2.5</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     
@@ -11,44 +11,34 @@
         :root { --primary: #6c5ce7; --bg: #0f172a; --white: #ffffff; --danger: #ff4757; --success: #2ed573; --card: #1e293b; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: white; margin: 0; overflow-x: hidden; }
         
-        #matrixCanvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            background: var(--bg);
-            transition: opacity 0.5s;
-        }
+        #matrixCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: var(--bg); transition: opacity 0.5s; }
 
-        .toggle-matrix { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 5px 10px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; margin-left: 10px; }
-
-        #loginScreen { display: flex; align-items: center; justify-content: center; height: 100vh; position: relative; }
-        .login-card { background: rgba(30, 41, 59, 0.9); padding: 30px; border-radius: 20px; width: 90%; max-width: 350px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #334155; }
+        #loginScreen { display: flex; align-items: center; justify-content: center; height: 100vh; }
+        .login-card { background: rgba(30, 41, 59, 0.9); padding: 30px; border-radius: 20px; width: 90%; max-width: 350px; text-align: center; border: 1px solid #334155; }
         
         input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #334155; border-radius: 10px; background: #0f172a; color: white; }
-        .btn-action { width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-action { width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; }
         .create-btn { background: var(--success); color: white; }
         .join-btn { background: var(--primary); color: white; }
         
         #gameScreen { display: none; height: 100vh; flex-direction: column; position: relative; }
-        .header-nav { width: 100%; background: rgba(30, 41, 59, 0.95); border-bottom: 2px solid var(--primary); }
         .nav-top { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: var(--primary); }
         .player-list { display: flex; overflow-x: auto; padding: 10px; gap: 12px; background: rgba(15, 23, 42, 0.6); }
         .player-card { background: #0f172a; padding: 8px 15px; border-radius: 15px; border: 1px solid #334155; display: flex; align-items: center; gap: 10px; white-space: nowrap; }
-        .score-box { background: var(--success); padding: 2px 8px; border-radius: 8px; font-weight: bold; }
         
         .main-play { flex-grow: 1; display: flex; flex-direction: column; align-items: center; padding: 15px; overflow-y: auto; }
         .buzzer-btn { width: 180px; height: 180px; background: var(--danger); color: white; border: none; border-radius: 50%; font-size: 1.6rem; font-weight: bold; box-shadow: 0 10px #b33939; cursor: pointer; margin: 20px 0; z-index: 10; }
-        .buzzer-btn:disabled { background: #475569; box-shadow: none; transform: translateY(8px); }
+        .buzzer-btn:disabled { background: #475569; box-shadow: none; transform: translateY(8px); opacity: 0.6; }
         
+        /* عداد تنازلي ضخم */
+        #countdownOverlay { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 8rem; font-weight: bold; color: var(--primary); text-shadow: 0 0 20px var(--primary); z-index: 100; display: none; pointer-events: none; }
+
         .rank-box { width: 100%; max-width: 450px; background: rgba(30, 41, 59, 0.85); border-radius: 15px; padding: 15px; margin-bottom: 10px; border: 1px solid #334155; }
         .rank-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #334155; }
         
-        .chat-area { width: 100%; max-width: 450px; background: rgba(30, 41, 59, 0.85); border-radius: 15px; height: 150px; display: flex; flex-direction: column; border: 1px solid #334155; }
-        #chatMessages { flex-grow: 1; padding: 10px; overflow-y: auto; font-size: 0.85rem; text-align: right; }
-        #chatInput { border: none; border-top: 1px solid #334155; background: #0f172a; padding: 12px; color: white; border-radius: 0 0 15px 15px; }
+        .chat-area { width: 100%; max-width: 450px; background: rgba(30, 41, 59, 0.85); border-radius: 15px; height: 120px; display: flex; flex-direction: column; border: 1px solid #334155; }
+        #chatMessages { flex-grow: 1; padding: 8px; overflow-y: auto; font-size: 0.8rem; }
+        #chatInput { border: none; border-top: 1px solid #334155; background: #0f172a; padding: 10px; color: white; border-radius: 0 0 15px 15px; }
         
         .hidden { display: none !important; }
         .logout-btn { background: #ff4757; color: white; border: none; padding: 5px 12px; border-radius: 8px; cursor: pointer; }
@@ -57,6 +47,7 @@
 <body>
 
     <canvas id="matrixCanvas"></canvas>
+    <div id="countdownOverlay">3</div>
 
     <div id="loginScreen">
         <div class="login-card">
@@ -69,21 +60,15 @@
             <input type="text" id="roomCodeInput" placeholder="رمز الغرفة">
             <button class="btn-action join-btn" onclick="startApp('join')">دخول</button>
             <button class="btn-action create-btn" onclick="startApp('create')">إنشاء غرفة</button>
-            <button class="toggle-matrix" onclick="toggleMatrix()" style="margin-top: 15px; width: 100%;">تشغيل/إيقاف الخلفية ✨</button>
         </div>
     </div>
 
     <div id="gameScreen">
-        <div class="header-nav">
-            <div class="nav-top">
-                <div>
-                    <span id="roomDisplay">غرفة: #----</span>
-                    <button class="toggle-matrix" onclick="toggleMatrix()">✨</button>
-                </div>
-                <button class="logout-btn" onclick="logout()">خروج 🚪</button>
-            </div>
-            <div id="playerList" class="player-list"></div>
+        <div class="nav-top">
+            <span id="roomDisplay">غرفة: #----</span>
+            <button class="logout-btn" onclick="logout()">خروج 🚪</button>
         </div>
+        <div id="playerList" class="player-list"></div>
         
         <div class="main-play">
             <div id="playerUI" style="text-align: center; width: 100%;">
@@ -94,89 +79,51 @@
             <div class="rank-box">
                 <strong>ترتيب الضغطات:</strong>
                 <div id="rankContainer">بانتظار المتسابقين...</div>
-                <div id="adminResetArea" class="hidden" style="margin-top:15px; text-align:center;">
-                    <button class="btn-action join-btn" onclick="triggerReset()">ريسيت للجولة 🔄</button>
+                <div id="adminResetArea" class="hidden" style="margin-top:10px;">
+                    <button id="resetBtn" class="btn-action join-btn" onclick="triggerReset()">إعادة جولة جديدة 🔄</button>
                 </div>
             </div>
 
             <div class="chat-area">
                 <div id="chatMessages"></div>
-                <input type="text" id="chatInput" placeholder="اكتب رسالة واضغط Enter...">
+                <input type="text" id="chatInput" placeholder="اكتب رسالة...">
             </div>
         </div>
     </div>
 
 <script>
-    // --- برمجة نغمة الجرس "تن تن" إلكترونياً ---
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    // نغمة تن تن (للضغط)
     function playBuzzerSound() {
         const now = audioCtx.currentTime;
-        
-        // النغمة الأولى "تن"
-        const osc1 = audioCtx.createOscillator();
-        const gain1 = audioCtx.createGain();
-        osc1.type = 'triangle';
-        osc1.frequency.setValueAtTime(880, now); // تردد مرتفع
-        gain1.gain.setValueAtTime(0.3, now);
-        gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-        osc1.connect(gain1);
-        gain1.connect(audioCtx.destination);
-        osc1.start(now);
-        osc1.stop(now + 0.2);
-
-        // النغمة الثانية "تن" بعد وقت قصير جداً
-        const osc2 = audioCtx.createOscillator();
-        const gain2 = audioCtx.createGain();
-        osc2.type = 'triangle';
-        osc2.frequency.setValueAtTime(1046.50, now + 0.15); // تردد أعلى قليلاً
-        gain2.gain.setValueAtTime(0.3, now + 0.15);
-        gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
-        osc2.connect(gain2);
-        gain2.connect(audioCtx.destination);
-        osc2.start(now + 0.15);
-        osc2.stop(now + 0.4);
+        [880, 1046].forEach((freq, i) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now + (i * 0.1));
+            gain.gain.setValueAtTime(0.2, now + (i * 0.1));
+            gain.gain.exponentialRampToValueAtTime(0.01, now + (i * 0.1) + 0.2);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(now + (i * 0.1)); osc.stop(now + (i * 0.1) + 0.2);
+        });
     }
 
-    // --- التحكم بالخلفية ---
-    let matrixEnabled = true;
-    function toggleMatrix() {
-        matrixEnabled = !matrixEnabled;
-        document.getElementById('matrixCanvas').style.opacity = matrixEnabled ? "1" : "0";
+    // نغمة الريسيت (طويلة وتصاعدية)
+    function playResetSound() {
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(220, now);
+        osc.frequency.exponentialRampToValueAtTime(880, now + 1.5); // تصاعد حاد
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.linearRampToValueAtTime(0, now + 1.5);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(now); osc.stop(now + 1.5);
     }
 
-    const canvas = document.getElementById('matrixCanvas');
-    const ctx = canvas.getContext('2d');
-    canvas.height = window.innerHeight;
-    canvas.width = window.innerWidth;
-
-    const characters = ['?'];
-    const fontSize = 18;
-    const columns = (canvas.width / fontSize) / 2; 
-    const drops = [];
-
-    for (let i = 0; i < columns; i++) { drops[i] = Math.random() * -100; }
-
-    function drawMatrix() {
-        if(!matrixEnabled) return;
-        ctx.fillStyle = 'rgba(15, 23, 42, 0.15)'; 
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = 'rgba(108, 92, 231, 0.2)'; 
-        for (let i = 0; i < drops.length; i++) {
-            const randomSize = fontSize + (Math.sin(i) * 6);
-            ctx.font = randomSize + 'px monospace';
-            ctx.fillText(characters[0], i * (fontSize * 2), drops[i] * fontSize);
-            if (drops[i] * fontSize > canvas.height && Math.random() > 0.98) { drops[i] = 0; }
-            drops[i] += 0.5; 
-        }
-    }
-    setInterval(drawMatrix, 50);
-
-    window.addEventListener('resize', () => {
-        canvas.height = window.innerHeight;
-        canvas.width = window.innerWidth;
-    });
-
-    // --- كود Firebase ومزامنة الوقت ---
+    // --- Firebase Logic ---
     const firebaseConfig = {
         apiKey: "AIzaSyCp3On2Z1xFeZrIQlOsQvsIoGHaGnFvmBw",
         authDomain: "buzzergame-f59e4.firebaseapp.com",
@@ -189,70 +136,45 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    let myName, myRole, myRoom;
+    let myName, myRole, myRoom, serverTimeOffset = 0;
     
-    let serverTimeOffset = 0;
-    db.ref(".info/serverTimeOffset").on("value", (snap) => {
-        serverTimeOffset = snap.val();
-    });
+    db.ref(".info/serverTimeOffset").on("value", s => serverTimeOffset = s.val());
 
-    window.onload = () => {
-        const saved = localStorage.getItem('minerva_session');
-        if(saved) {
-            const s = JSON.parse(saved);
-            document.getElementById('userName').value = s.name;
-            document.getElementById('userRole').value = s.role;
-            document.getElementById('roomCodeInput').value = s.room;
-            startApp('join', true);
-        }
-    };
-
-    function startApp(mode, isAuto = false) {
+    function startApp(mode) {
         myName = document.getElementById('userName').value.trim();
         myRole = document.getElementById('userRole').value;
         myRoom = (mode === 'create') ? Math.floor(1000 + Math.random() * 9000).toString() : document.getElementById('roomCodeInput').value.trim();
+        if(!myName || !myRoom) return alert("اكمل البيانات");
 
-        if(!myName || !myRoom) return !isAuto && alert("تأكد من البيانات");
-
-        localStorage.setItem('minerva_session', JSON.stringify({name: myName, role: myRole, room: myRoom}));
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('gameScreen').style.display = 'flex';
         document.getElementById('roomDisplay').innerText = "غرفة: #" + myRoom;
 
-        if(myRole === 'admin') {
-            document.getElementById('playerUI').style.display = 'none';
-            document.getElementById('adminResetArea').classList.remove('hidden');
-        }
+        if(myRole === 'admin') document.getElementById('adminResetArea').classList.remove('hidden');
 
         db.ref(`rooms/${myRoom}/players/${myName}`).set({ name: myName, role: myRole });
         db.ref(`rooms/${myRoom}/players/${myName}`).onDisconnect().remove();
 
         listenToRoom();
-        listenToChat();
     }
 
     function listenToRoom() {
+        // الاستماع لحالة الريسيت (العد التنازلي)
+        db.ref(`rooms/${myRoom}/resetting`).on('value', snap => {
+            if(snap.val()) startLocalCountdown();
+        });
+
         db.ref(`rooms/${myRoom}`).on('value', snap => {
             const data = snap.val() || {};
+            const clicks = data.clicks || {};
             const players = data.players || {};
             const scores = data.scores || {};
-            const clicks = data.clicks || {};
             
+            // تحديث القائمة والترتيب
             const list = document.getElementById('playerList');
             list.innerHTML = "";
             Object.values(players).forEach(p => {
-                const pScore = scores[p.name] || 0;
-                let adminBtns = (myRole === 'admin') ? `
-                    <button style="background:var(--success); border:none; color:white; border-radius:4px; padding:2px 5px; cursor:pointer;" onclick="modScore('${p.name}', 1)">+</button>
-                    <button style="background:var(--danger); border:none; color:white; border-radius:4px; padding:2px 5px; cursor:pointer;" onclick="modScore('${p.name}', -1)">-</button>
-                ` : "";
-                
-                list.innerHTML += `
-                    <div class="player-card">
-                        <span>${p.role=='admin'?'👑':'🎮'} ${p.name} ${p.name==myName?'(أنت)':''}</span>
-                        <div class="score-box">${pScore}</div>
-                        ${adminBtns}
-                    </div>`;
+                list.innerHTML += `<div class="player-card"><span>${p.role=='admin'?'👑':'🎮'} ${p.name}</span><b style="color:var(--success)">${scores[p.name]||0}</b></div>`;
             });
 
             const container = document.getElementById('rankContainer');
@@ -260,7 +182,7 @@
             
             if(clickArray.length === 0) {
                 container.innerHTML = "بانتظار الضغط...";
-                document.getElementById('mainBuzzer').disabled = false;
+                if(!snap.child('resetting').val()) document.getElementById('mainBuzzer').disabled = false;
                 document.getElementById('statusMsg').innerText = "استعد!";
             } else {
                 let html = "";
@@ -272,42 +194,58 @@
         });
     }
 
-    function listenToChat() {
-        const chatBox = document.getElementById('chatMessages');
-        db.ref(`rooms/${myRoom}/chat`).on('child_added', snap => {
-            const m = snap.val();
-            const msgDiv = document.createElement('div');
-            msgDiv.style.marginBottom = "5px";
-            msgDiv.innerHTML = `<b style="color:var(--primary)">${m.user}:</b> ${m.text}`;
-            chatBox.appendChild(msgDiv);
-            chatBox.scrollTop = chatBox.scrollHeight;
-        });
+    function startLocalCountdown() {
+        const overlay = document.getElementById('countdownOverlay');
+        const buzzer = document.getElementById('mainBuzzer');
+        buzzer.disabled = true; // قفل الزر فوراً
+        overlay.style.display = 'block';
+        playResetSound();
+
+        let count = 3;
+        overlay.innerText = count;
+        
+        const timer = setInterval(() => {
+            count--;
+            if(count > 0) {
+                overlay.innerText = count;
+            } else {
+                clearInterval(timer);
+                overlay.style.display = 'none';
+                if(myRole === 'player') buzzer.disabled = false; // فتح الزر بعد الـ 1
+                document.getElementById('statusMsg').innerText = "اضغط الآن!";
+            }
+        }, 1000);
+    }
+
+    function triggerReset() {
+        const roomRef = db.ref(`rooms/${myRoom}`);
+        roomRef.update({ resetting: true, clicks: null }); // تفعيل حالة الريسيت للكل
+        setTimeout(() => roomRef.update({ resetting: false }), 500); // إغلاق الحالة لضمان عدم التكرار
     }
 
     document.getElementById('mainBuzzer').onclick = function() {
         this.disabled = true;
-        
-        // تشغيل النغمة الإلكترونية "تن تن"
-        if (audioCtx.state === 'suspended') { audioCtx.resume(); }
+        if (audioCtx.state === 'suspended') audioCtx.resume();
         playBuzzerSound();
+        db.ref(`rooms/${myRoom}/clicks`).push({ name: myName, time: Date.now() + serverTimeOffset });
+    };
 
-        const accurateTime = Date.now() + serverTimeOffset;
-        db.ref(`rooms/${myRoom}/clicks`).push({ 
-            name: myName, 
-            time: accurateTime 
+    // --- Matrix Animation ---
+    const canvas = document.getElementById('matrixCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.height = window.innerHeight; canvas.width = window.innerWidth;
+    const drops = Array(Math.floor(canvas.width/20)).fill(0);
+    function draw() {
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.1)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'rgba(108, 92, 231, 0.3)'; ctx.font = '15px monospace';
+        drops.forEach((y, i) => {
+            ctx.fillText('?', i * 20, y);
+            if(y > canvas.height && Math.random() > 0.975) drops[i] = 0;
+            drops[i] += 15;
         });
-        document.getElementById('statusMsg').innerText = "تم!";
-    };
+    }
+    setInterval(draw, 50);
 
-    document.getElementById('chatInput').onkeypress = function(e) {
-        if (e.key === 'Enter' && this.value.trim()) {
-            db.ref(`rooms/${myRoom}/chat`).push({ user: myName, text: this.value.trim() });
-            this.value = "";
-        }
-    };
-
-    function modScore(target, val) { db.ref(`rooms/${myRoom}/scores/${target}`).transaction(c => (c || 0) + val); }
-    function triggerReset() { db.ref(`rooms/${myRoom}/clicks`).remove(); }
     function logout() { localStorage.removeItem('minerva_session'); location.reload(); }
 </script>
 </body>
