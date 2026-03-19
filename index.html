@@ -3,16 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buzzer Online</title>
+    <title>Minerva System</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     
     <style>
         :root { --primary: #6c5ce7; --bg: #0f172a; --white: #ffffff; --danger: #ff4757; --success: #2ed573; --card: #1e293b; }
-        
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: white; margin: 0; overflow-x: hidden; }
         
-        /* تنسيق الخلفية المتحركة */
+        /* تنسيق خلفية هادئة */
         #matrixCanvas {
             position: fixed;
             top: 0;
@@ -20,11 +19,11 @@
             width: 100%;
             height: 100%;
             z-index: -1;
-            background: #0f172a;
+            background: var(--bg);
         }
 
         #loginScreen { display: flex; align-items: center; justify-content: center; height: 100vh; position: relative; }
-        .login-card { background: var(--card); padding: 30px; border-radius: 20px; width: 90%; max-width: 350px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .login-card { background: rgba(30, 41, 59, 0.9); padding: 30px; border-radius: 20px; width: 90%; max-width: 350px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #334155; }
         
         input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #334155; border-radius: 10px; background: #0f172a; color: white; }
         .btn-action { width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
@@ -32,9 +31,9 @@
         .join-btn { background: var(--primary); color: white; }
         
         #gameScreen { display: none; height: 100vh; flex-direction: column; position: relative; }
-        .header-nav { width: 100%; background: var(--card); border-bottom: 2px solid var(--primary); }
+        .header-nav { width: 100%; background: rgba(30, 41, 59, 0.95); border-bottom: 2px solid var(--primary); }
         .nav-top { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: var(--primary); }
-        .player-list { display: flex; overflow-x: auto; padding: 10px; gap: 12px; background: rgba(30, 41, 59, 0.8); }
+        .player-list { display: flex; overflow-x: auto; padding: 10px; gap: 12px; background: rgba(15, 23, 42, 0.6); }
         .player-card { background: #0f172a; padding: 8px 15px; border-radius: 15px; border: 1px solid #334155; display: flex; align-items: center; gap: 10px; white-space: nowrap; }
         .score-box { background: var(--success); padding: 2px 8px; border-radius: 8px; font-weight: bold; }
         
@@ -42,10 +41,10 @@
         .buzzer-btn { width: 180px; height: 180px; background: var(--danger); color: white; border: none; border-radius: 50%; font-size: 1.6rem; font-weight: bold; box-shadow: 0 10px #b33939; cursor: pointer; margin: 20px 0; z-index: 10; }
         .buzzer-btn:disabled { background: #475569; box-shadow: none; transform: translateY(8px); }
         
-        .rank-box { width: 100%; max-width: 450px; background: rgba(30, 41, 59, 0.9); border-radius: 15px; padding: 15px; margin-bottom: 10px; }
+        .rank-box { width: 100%; max-width: 450px; background: rgba(30, 41, 59, 0.85); border-radius: 15px; padding: 15px; margin-bottom: 10px; border: 1px solid #334155; }
         .rank-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #334155; }
         
-        .chat-area { width: 100%; max-width: 450px; background: rgba(30, 41, 59, 0.9); border-radius: 15px; height: 150px; display: flex; flex-direction: column; border: 1px solid #334155; }
+        .chat-area { width: 100%; max-width: 450px; background: rgba(30, 41, 59, 0.85); border-radius: 15px; height: 150px; display: flex; flex-direction: column; border: 1px solid #334155; }
         #chatMessages { flex-grow: 1; padding: 10px; overflow-y: auto; font-size: 0.85rem; text-align: right; }
         #chatInput { border: none; border-top: 1px solid #334155; background: #0f172a; padding: 12px; color: white; border-radius: 0 0 15px 15px; }
         
@@ -59,7 +58,7 @@
 
     <div id="loginScreen">
         <div class="login-card">
-            <h2 style="color: var(--primary);">Buzzer Online</h2>
+            <h2 style="color: var(--primary);">MINERVA SYSTEM</h2>
             <input type="text" id="userName" placeholder="اسمك المستعار">
             <select id="userRole">
                 <option value="player">أنا لاعب</option>
@@ -104,50 +103,54 @@
     <audio id="audioBuzzer" src="https://www.soundjay.com/buttons/sounds/button-37.mp3"></audio>
 
 <script>
-    // --- كود الخلفية المتحركة (الاستفهامات) ---
+    // --- كود الخلفية الهادئة جداً ---
     const canvas = document.getElementById('matrixCanvas');
     const ctx = canvas.getContext('2d');
-
     canvas.height = window.innerHeight;
     canvas.width = window.innerWidth;
 
     const characters = ['?'];
-    const fontSize = 16;
-    const columns = canvas.width / fontSize;
+    const fontSize = 18;
+    // تقليل عدد الأعمدة للنصف لراحة العين
+    const columns = (canvas.width / fontSize) / 2; 
     const drops = [];
 
     for (let i = 0; i < columns; i++) {
-        drops[i] = Math.random() * -100; // البدء بمواقع عشوائية فوق الشاشة
+        drops[i] = Math.random() * -100;
     }
 
     function drawMatrix() {
-        ctx.fillStyle = 'rgba(15, 23, 42, 0.1)'; // يترك أثراً خفيفاً خلف الرمز
+        // جعل الطبقة المغطية شفافة جداً ليكون التأثير ناعماً
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.15)'; 
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        ctx.fillStyle = '#6c5ce7'; // لون الرموز (نفس اللون الأساسي للتطبيق)
+        // لون باهت (شفافية منخفضة) لعلامة الاستفهام
+        ctx.fillStyle = 'rgba(108, 92, 231, 0.2)'; 
         
         for (let i = 0; i < drops.length; i++) {
-            // تنويع الأحجام بشكل عشوائي بسيط
-            const currentSize = fontSize + (Math.sin(i) * 5); 
-            ctx.font = currentSize + 'px monospace';
+            // تباين أحجام عشوائي
+            const randomSize = fontSize + (Math.sin(i) * 6);
+            ctx.font = randomSize + 'px monospace';
             
             const text = characters[0];
-            ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+            // توزيع الأعمدة بمسافات أكبر
+            ctx.fillText(text, i * (fontSize * 2), drops[i] * fontSize);
 
-            if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+            if (drops[i] * fontSize > canvas.height && Math.random() > 0.98) {
                 drops[i] = 0;
             }
-            drops[i]++;
+            // سرعة بطيئة وانسيابية
+            drops[i] += 0.5; 
         }
     }
-    setInterval(drawMatrix, 40);
+    setInterval(drawMatrix, 50);
 
     window.addEventListener('resize', () => {
         canvas.height = window.innerHeight;
         canvas.width = window.innerWidth;
     });
-    // --- نهاية كود الخلفية ---
 
+    // --- كود Firebase والوظائف ---
     const firebaseConfig = {
         apiKey: "AIzaSyCp3On2Z1xFeZrIQlOsQvsIoGHaGnFvmBw",
         authDomain: "buzzergame-f59e4.firebaseapp.com",
@@ -163,7 +166,7 @@
     let myName, myRole, myRoom;
 
     window.onload = () => {
-        const saved = localStorage.getItem('buzzer_session');
+        const saved = localStorage.getItem('minerva_session');
         if(saved) {
             const s = JSON.parse(saved);
             document.getElementById('userName').value = s.name;
@@ -180,7 +183,7 @@
 
         if(!myName || !myRoom) return !isAuto && alert("تأكد من البيانات");
 
-        localStorage.setItem('buzzer_session', JSON.stringify({name: myName, role: myRole, room: myRoom}));
+        localStorage.setItem('minerva_session', JSON.stringify({name: myName, role: myRole, room: myRoom}));
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('gameScreen').style.display = 'flex';
         document.getElementById('roomDisplay').innerText = "غرفة: #" + myRoom;
@@ -266,7 +269,7 @@
 
     function modScore(target, val) { db.ref(`rooms/${myRoom}/scores/${target}`).transaction(c => (c || 0) + val); }
     function triggerReset() { db.ref(`rooms/${myRoom}/clicks`).remove(); }
-    function logout() { localStorage.removeItem('buzzer_session'); location.reload(); }
+    function logout() { localStorage.removeItem('minerva_session'); location.reload(); }
 </script>
 </body>
 </html>
