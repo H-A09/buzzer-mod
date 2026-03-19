@@ -21,51 +21,30 @@
 
         #gameScreen { display: none; height: 100vh; flex-direction: column; }
 
-        /* تنسيق القائمة العلوية للجوال والكمبيوتر */
-        .sidebar { width: 100%; background: var(--white); border-bottom: 2px solid var(--primary); display: flex; flex-direction: column; max-height: 200px; }
-        .sidebar-header { padding: 10px; background: var(--primary); color: white; font-weight: bold; text-align: center; font-size: 0.9rem; }
+        .sidebar { width: 100%; background: var(--white); border-bottom: 2px solid var(--primary); display: flex; flex-direction: column; }
+        .sidebar-header { padding: 8px; background: var(--primary); color: white; font-weight: bold; text-align: center; font-size: 0.8rem; }
         
-        /* قائمة الأسماء المتحركة أفقياً */
-        .player-list { 
-            display: flex; 
-            flex-direction: row; 
-            overflow-x: auto; 
-            padding: 10px; 
-            gap: 10px; 
-            white-space: nowrap;
-            background: #f8f9fa;
-            -webkit-overflow-scrolling: touch;
-        }
-        .player-card { 
-            background: var(--white); 
-            padding: 8px 15px; 
-            border-radius: 20px; 
-            border: 1px solid #ddd;
-            display: flex; 
-            align-items: center; 
-            gap: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
+        .player-list { display: flex; flex-direction: row; overflow-x: auto; padding: 10px; gap: 10px; background: #f8f9fa; }
+        .player-card { background: var(--white); padding: 8px 15px; border-radius: 20px; border: 1px solid #ddd; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+        .me-badge { color: var(--primary); font-size: 0.7rem; font-weight: bold; border: 1px solid var(--primary); padding: 1px 4px; border-radius: 4px; }
         .score-tag { background: var(--success); color: white; padding: 2px 7px; border-radius: 10px; font-size: 0.8rem; font-weight: bold; }
 
-        /* منطقة اللعب */
-        .main-play { flex-grow: 1; display: flex; flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; position: relative; }
-        .room-badge { background: var(--accent); color: white; padding: 5px 15px; border-radius: 20px; font-weight: bold; margin-bottom: 10px; }
+        .main-play { flex-grow: 1; display: flex; flex-direction: column; align-items: center; padding: 15px; overflow-y: auto; }
+        .room-badge { background: var(--accent); color: white; padding: 5px 15px; border-radius: 20px; font-weight: bold; margin-bottom: 5px; }
 
-        .buzzer-btn { width: 180px; height: 180px; background: var(--danger); color: white; border: none; border-radius: 50%; font-size: 1.5rem; font-weight: bold; box-shadow: 0 10px #b33939; cursor: pointer; margin: 20px 0; transition: 0.1s; }
-        .buzzer-btn:active:not(:disabled) { transform: translateY(6px); box-shadow: 0 4px #b33939; }
-        .buzzer-btn:disabled { background: #dcdde1; box-shadow: 0 6px #7f8c8d; }
+        .buzzer-btn { width: 160px; height: 160px; background: var(--danger); color: white; border: none; border-radius: 50%; font-size: 1.4rem; font-weight: bold; box-shadow: 0 8px #b33939; cursor: pointer; margin: 15px 0; transition: 0.1s; }
+        .buzzer-btn:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 4px #b33939; }
+        .buzzer-btn:disabled { background: #dcdde1; box-shadow: 0 4px #7f8c8d; }
 
-        /* نتائج الجولة والدردشة */
-        .rank-box { width: 100%; max-width: 450px; background: white; border-radius: 15px; padding: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-        .rank-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee; }
+        .rank-box { width: 100%; max-width: 400px; background: white; border-radius: 15px; padding: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .rank-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #eee; }
         
-        .chat-area { width: 100%; max-width: 450px; margin-top: 15px; background: white; border-radius: 15px; display: flex; flex-direction: column; height: 150px; border: 1px solid #eee; }
-        #chatMessages { flex-grow: 1; padding: 10px; overflow-y: auto; font-size: 0.85rem; }
-        #chatInput { border: none; border-top: 1px solid #eee; padding: 10px; border-radius: 0 0 15px 15px; }
+        .chat-area { width: 100%; max-width: 400px; margin-top: 10px; background: white; border-radius: 15px; display: flex; flex-direction: column; height: 120px; border: 1px solid #eee; }
+        #chatMessages { flex-grow: 1; padding: 8px; overflow-y: auto; font-size: 0.8rem; }
+        #chatInput { border: none; border-top: 1px solid #eee; padding: 8px; border-radius: 0 0 15px 15px; }
 
-        .btn-point { background: var(--success); color: white; border: none; border-radius: 5px; cursor: pointer; padding: 4px 10px; font-size: 0.8rem; }
-        .btn-reset { padding: 12px 40px; background: var(--success); color: white; border: none; border-radius: 30px; font-weight: bold; cursor: pointer; margin: 15px 0; }
+        .btn-point { background: var(--success); color: white; border: none; border-radius: 5px; cursor: pointer; padding: 3px 8px; font-size: 0.75rem; }
+        .btn-reset { padding: 10px 30px; background: var(--primary); color: white; border: none; border-radius: 30px; font-weight: bold; cursor: pointer; margin: 10px 0; }
 
         .hidden { display: none !important; }
     </style>
@@ -88,32 +67,32 @@
 
     <div id="gameScreen">
         <div class="sidebar">
-            <div class="sidebar-header">المتواجدون (اسحب لليمين/اليسار ↔️)</div>
+            <div class="sidebar-header">المتواجدون والنتائج</div>
             <div id="playerList" class="player-list"></div>
         </div>
         
         <div class="main-play">
             <div id="roomDisplay" class="room-badge">غرفة: #----</div>
-            <h3 id="statusMsg">استعد للضغط!</h3>
+            <h3 id="statusMsg" style="margin: 5px 0;">استعد!</h3>
             <button id="mainBuzzer" class="buzzer-btn">اضغط!</button>
             
             <div class="rank-box">
                 <strong>ترتيب الضغطات:</strong>
-                <div id="rankContainer">بانتظار المتسابقين...</div>
+                <div id="rankContainer">بانتظار الضغط...</div>
             </div>
 
             <div class="chat-area">
                 <div id="chatMessages"></div>
-                <input type="text" id="chatInput" placeholder="اكتب رسالة...">
+                <input type="text" id="chatInput" placeholder="رسالة...">
             </div>
 
             <div id="adminArea" class="hidden">
-                <button class="btn-reset" onclick="triggerReset()">إعادة تعيين (Reset) 🔄</button>
+                <button class="btn-reset" onclick="triggerReset()">ريسيت للجولة 🔄</button>
             </div>
         </div>
     </div>
 
-    <audio id="audioBuzzer" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3"></audio>
+    <audio id="audioBuzzer" src="https://www.soundjay.com/buttons/sounds/button-37.mp3"></audio>
 
 <script>
     const firebaseConfig = {
@@ -128,7 +107,7 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    let myName, myRole, myRoom, myPlayerKey;
+    let myName, myRole, myRoom;
 
     function startApp(mode) {
         myName = document.getElementById('userName').value.trim();
@@ -148,9 +127,8 @@
 
         if(myRole === 'admin') document.getElementById('adminArea').classList.remove('hidden');
 
-        // تسجيل اللاعب مع الاحتفاظ بالـ Key لمنع الاختفاء
-        const playerRef = db.ref(`rooms/${myRoom}/players`).push();
-        myPlayerKey = playerRef.key;
+        // تسجيل دخول اللاعب في قائمة اللاعبين الدائمة
+        const playerRef = db.ref(`rooms/${myRoom}/players/${myName}`);
         playerRef.set({ name: myName, role: myRole });
         playerRef.onDisconnect().remove();
 
@@ -158,25 +136,27 @@
     }
 
     function listenToRoom() {
-        // تحديث القائمة العلوية مع النقاط
+        // الاستماع للاعبين والنقاط
         db.ref(`rooms/${myRoom}`).on('value', snap => {
             const data = snap.val() || {};
             const players = data.players || {};
             const scores = data.scores || {};
+            const clicks = data.clicks || {};
             
+            // 1. تحديث القائمة العلوية (ثابتة لا تتأثر بالريسيت)
             const list = document.getElementById('playerList');
             list.innerHTML = "";
             Object.values(players).forEach(p => {
                 const pScore = scores[p.name] || 0;
+                const isMe = p.name === myName ? '<span class="me-badge">أنت</span>' : '';
                 list.innerHTML += `
                     <div class="player-card">
-                        <span>${p.role=='admin'?'👑':'🎮'} ${p.name}</span>
+                        <span>${p.role=='admin'?'👑':'🎮'} ${p.name} ${isMe}</span>
                         <span class="score-tag">${pScore}</span>
                     </div>`;
             });
 
-            // تحديث جدول الترتيب
-            const clicks = data.clicks || {};
+            // 2. تحديث جدول الضغطات
             const container = document.getElementById('rankContainer');
             let clickArray = Object.values(clicks).sort((a, b) => a.time - b.time);
             
@@ -192,7 +172,7 @@
                             <span>${index+1}. ${c.name}</span>
                             <span>
                                 ${index === 0 ? "الأول!" : "+"+((c.time - clickArray[0].time)/1000).toFixed(2)+"s"}
-                                ${myRole=='admin' ? `<button class="btn-point" onclick="addPoint('${c.name}')">نقطة +</button>` : ''}
+                                ${myRole=='admin' ? `<button class="btn-point" onclick="addPoint('${c.name}')">+1</button>` : ''}
                             </span>
                         </div>`;
                 });
@@ -201,10 +181,9 @@
         });
 
         // الدردشة
-        db.ref(`rooms/${myRoom}/chat`).limitToLast(15).on('child_added', snap => {
+        db.ref(`rooms/${myRoom}/chat`).limitToLast(10).on('child_added', snap => {
             const m = snap.val();
             const msgDiv = document.createElement('div');
-            msgDiv.style.marginBottom = "3px";
             msgDiv.innerHTML = `<b>${m.user}:</b> ${m.text}`;
             const box = document.getElementById('chatMessages');
             box.appendChild(msgDiv);
@@ -216,7 +195,7 @@
         this.disabled = true;
         document.getElementById('audioBuzzer').play();
         db.ref(`rooms/${myRoom}/clicks`).push({ name: myName, time: firebase.database.ServerValue.TIMESTAMP });
-        document.getElementById('statusMsg').innerText = "تم تسجيل ضغطتك!";
+        document.getElementById('statusMsg').innerText = "تم!";
     };
 
     function addPoint(playerName) {
