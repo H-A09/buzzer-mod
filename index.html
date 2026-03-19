@@ -42,6 +42,9 @@
         .main-play { flex-grow: 1; display: flex; flex-direction: column; align-items: center; padding: 15px; overflow-y: auto; }
         .buzzer-btn { width: 180px; height: 180px; background: var(--danger); color: white; border: none; border-radius: 50%; font-size: 1.6rem; font-weight: bold; box-shadow: 0 10px #b33939; cursor: pointer; margin: 20px 0; z-index: 10; }
         .buzzer-btn:disabled { background: #475569; box-shadow: none; transform: translateY(8px); }
+
+        /* إضافة ستايل العداد التنازلي */
+        #countdownOverlay { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 9rem; font-weight: bold; color: var(--primary); text-shadow: 0 0 30px rgba(108, 92, 231, 0.5); z-index: 1000; display: none; pointer-events: none; }
         
         .rank-box { width: 100%; max-width: 450px; background: rgba(30, 41, 59, 0.85); border-radius: 15px; padding: 15px; margin-bottom: 10px; border: 1px solid #334155; }
         .rank-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #334155; }
@@ -57,6 +60,7 @@
 <body>
 
     <canvas id="matrixCanvas"></canvas>
+    <div id="countdownOverlay"></div>
 
     <div id="loginScreen">
         <div class="login-card">
@@ -95,7 +99,7 @@
                 <strong>ترتيب الضغطات:</strong>
                 <div id="rankContainer">بانتظار المتسابقين...</div>
                 <div id="adminResetArea" class="hidden" style="margin-top:15px; text-align:center;">
-                    <button class="btn-action join-btn" onclick="triggerReset()">ريسيت للجولة 🔄</button>
+                    <button id="resetBtn" class="btn-action join-btn" onclick="triggerReset()">ريسيت للجولة 🔄</button>
                 </div>
             </div>
 
@@ -107,34 +111,43 @@
     </div>
 
 <script>
-    // --- برمجة نغمة الجرس "تن تن" إلكترونياً ---
+    // --- برمجة الأصوات الإلكترونية ---
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
     function playBuzzerSound() {
         const now = audioCtx.currentTime;
-        
-        // النغمة الأولى "تن"
         const osc1 = audioCtx.createOscillator();
         const gain1 = audioCtx.createGain();
         osc1.type = 'triangle';
-        osc1.frequency.setValueAtTime(880, now); // تردد مرتفع
+        osc1.frequency.setValueAtTime(880, now);
         gain1.gain.setValueAtTime(0.3, now);
         gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-        osc1.connect(gain1);
-        gain1.connect(audioCtx.destination);
-        osc1.start(now);
-        osc1.stop(now + 0.2);
+        osc1.connect(gain1); gain1.connect(audioCtx.destination);
+        osc1.start(now); osc1.stop(now + 0.2);
 
-        // النغمة الثانية "تن" بعد وقت قصير جداً
         const osc2 = audioCtx.createOscillator();
         const gain2 = audioCtx.createGain();
         osc2.type = 'triangle';
-        osc2.frequency.setValueAtTime(1046.50, now + 0.15); // تردد أعلى قليلاً
+        osc2.frequency.setValueAtTime(1046.50, now + 0.15);
         gain2.gain.setValueAtTime(0.3, now + 0.15);
         gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
-        osc2.connect(gain2);
-        gain2.connect(audioCtx.destination);
-        osc2.start(now + 0.15);
-        osc2.stop(now + 0.4);
+        osc2.connect(gain2); gain2.connect(audioCtx.destination);
+        osc2.start(now + 0.15); osc2.stop(now + 0.4);
+    }
+
+    // نغمة ريسيت طويلة وتصاعدية
+    function playResetSound() {
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(200, now);
+        osc.frequency.exponentialRampToValueAtTime(800, now + 2); 
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(0.2, now + 0.5);
+        gain.gain.linearRampToValueAtTime(0, now + 2);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(now); osc.stop(now + 2);
     }
 
     // --- التحكم بالخلفية ---
@@ -148,12 +161,10 @@
     const ctx = canvas.getContext('2d');
     canvas.height = window.innerHeight;
     canvas.width = window.innerWidth;
-
     const characters = ['?'];
     const fontSize = 18;
     const columns = (canvas.width / fontSize) / 2; 
     const drops = [];
-
     for (let i = 0; i < columns; i++) { drops[i] = Math.random() * -100; }
 
     function drawMatrix() {
@@ -171,12 +182,7 @@
     }
     setInterval(drawMatrix, 50);
 
-    window.addEventListener('resize', () => {
-        canvas.height = window.innerHeight;
-        canvas.width = window.innerWidth;
-    });
-
-    // --- كود Firebase ومزامنة الوقت ---
+    // --- كود Firebase ---
     const firebaseConfig = {
         apiKey: "AIzaSyCp3On2Z1xFeZrIQlOsQvsIoGHaGnFvmBw",
         authDomain: "buzzergame-f59e4.firebaseapp.com",
@@ -190,11 +196,8 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     let myName, myRole, myRoom;
-    
     let serverTimeOffset = 0;
-    db.ref(".info/serverTimeOffset").on("value", (snap) => {
-        serverTimeOffset = snap.val();
-    });
+    db.ref(".info/serverTimeOffset").on("value", (snap) => { serverTimeOffset = snap.val(); });
 
     window.onload = () => {
         const saved = localStorage.getItem('minerva_session');
@@ -211,7 +214,6 @@
         myName = document.getElementById('userName').value.trim();
         myRole = document.getElementById('userRole').value;
         myRoom = (mode === 'create') ? Math.floor(1000 + Math.random() * 9000).toString() : document.getElementById('roomCodeInput').value.trim();
-
         if(!myName || !myRoom) return !isAuto && alert("تأكد من البيانات");
 
         localStorage.setItem('minerva_session', JSON.stringify({name: myName, role: myRole, room: myRoom}));
@@ -232,6 +234,11 @@
     }
 
     function listenToRoom() {
+        // الاستماع لإشارة الريسيت والعد التنازلي
+        db.ref(`rooms/${myRoom}/resetting`).on('value', snap => {
+            if(snap.val()) startCountdownSequence();
+        });
+
         db.ref(`rooms/${myRoom}`).on('value', snap => {
             const data = snap.val() || {};
             const players = data.players || {};
@@ -246,13 +253,7 @@
                     <button style="background:var(--success); border:none; color:white; border-radius:4px; padding:2px 5px; cursor:pointer;" onclick="modScore('${p.name}', 1)">+</button>
                     <button style="background:var(--danger); border:none; color:white; border-radius:4px; padding:2px 5px; cursor:pointer;" onclick="modScore('${p.name}', -1)">-</button>
                 ` : "";
-                
-                list.innerHTML += `
-                    <div class="player-card">
-                        <span>${p.role=='admin'?'👑':'🎮'} ${p.name} ${p.name==myName?'(أنت)':''}</span>
-                        <div class="score-box">${pScore}</div>
-                        ${adminBtns}
-                    </div>`;
+                list.innerHTML += `<div class="player-card"><span>${p.role=='admin'?'👑':'🎮'} ${p.name}</span><div class="score-box">${pScore}</div>${adminBtns}</div>`;
             });
 
             const container = document.getElementById('rankContainer');
@@ -260,7 +261,7 @@
             
             if(clickArray.length === 0) {
                 container.innerHTML = "بانتظار الضغط...";
-                document.getElementById('mainBuzzer').disabled = false;
+                if(!data.resetting) document.getElementById('mainBuzzer').disabled = false;
                 document.getElementById('statusMsg').innerText = "استعد!";
             } else {
                 let html = "";
@@ -272,12 +273,35 @@
         });
     }
 
+    // وظيفة العد التنازلي
+    function startCountdownSequence() {
+        const overlay = document.getElementById('countdownOverlay');
+        const buzzer = document.getElementById('mainBuzzer');
+        buzzer.disabled = true; 
+        overlay.style.display = 'block';
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        playResetSound();
+
+        let count = 3;
+        overlay.innerText = count;
+        const interval = setInterval(() => {
+            count--;
+            if(count > 0) {
+                overlay.innerText = count;
+            } else {
+                clearInterval(interval);
+                overlay.style.display = 'none';
+                if(myRole === 'player') buzzer.disabled = false;
+                document.getElementById('statusMsg').innerText = "اضغط الآن!";
+            }
+        }, 1000);
+    }
+
     function listenToChat() {
         const chatBox = document.getElementById('chatMessages');
         db.ref(`rooms/${myRoom}/chat`).on('child_added', snap => {
             const m = snap.val();
             const msgDiv = document.createElement('div');
-            msgDiv.style.marginBottom = "5px";
             msgDiv.innerHTML = `<b style="color:var(--primary)">${m.user}:</b> ${m.text}`;
             chatBox.appendChild(msgDiv);
             chatBox.scrollTop = chatBox.scrollHeight;
@@ -286,16 +310,9 @@
 
     document.getElementById('mainBuzzer').onclick = function() {
         this.disabled = true;
-        
-        // تشغيل النغمة الإلكترونية "تن تن"
-        if (audioCtx.state === 'suspended') { audioCtx.resume(); }
+        if (audioCtx.state === 'suspended') audioCtx.resume();
         playBuzzerSound();
-
-        const accurateTime = Date.now() + serverTimeOffset;
-        db.ref(`rooms/${myRoom}/clicks`).push({ 
-            name: myName, 
-            time: accurateTime 
-        });
+        db.ref(`rooms/${myRoom}/clicks`).push({ name: myName, time: Date.now() + serverTimeOffset });
         document.getElementById('statusMsg').innerText = "تم!";
     };
 
@@ -307,7 +324,14 @@
     };
 
     function modScore(target, val) { db.ref(`rooms/${myRoom}/scores/${target}`).transaction(c => (c || 0) + val); }
-    function triggerReset() { db.ref(`rooms/${myRoom}/clicks`).remove(); }
+    
+    // تعديل وظيفة الريسيت لإطلاق العد التنازلي للجميع
+    function triggerReset() { 
+        const roomRef = db.ref(`rooms/${myRoom}`);
+        roomRef.update({ resetting: true, clicks: null });
+        setTimeout(() => roomRef.update({ resetting: false }), 1000);
+    }
+    
     function logout() { localStorage.removeItem('minerva_session'); location.reload(); }
 </script>
 </body>
