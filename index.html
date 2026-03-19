@@ -3,33 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buzzer Online - Firebase</title>
+    <title>Buzzer Online - Pro Version</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     
     <style>
-        :root { --primary: #6c5ce7; --bg: #f0f2f5; --white: #ffffff; --danger: #ff4757; --success: #2ed573; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; }
+        :root { --primary: #6c5ce7; --bg: #f0f2f5; --white: #ffffff; --danger: #ff4757; --success: #2ed573; --accent: #a29bfe; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; transition: all 0.3s ease; }
+        
+        /* تحسينات الواجهة وتأثيرات الانتقال */
+        #loginScreen, #gameScreen { transition: opacity 0.5s ease-in-out; }
+        
         #loginScreen { display: flex; align-items: center; justify-content: center; height: 100vh; background: linear-gradient(135deg, #6c5ce7, #a29bfe); }
-        .login-card { background: var(--white); padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 320px; text-align: center; }
-        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 2px solid #ddd; border-radius: 10px; box-sizing: border-box; }
-        .btn-action { width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .login-card { background: var(--white); padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 320px; text-align: center; transform: scale(1); transition: transform 0.3s ease; }
+        .login-card:hover { transform: scale(1.02); }
+
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 2px solid #eee; border-radius: 10px; box-sizing: border-box; transition: border-color 0.3s; }
+        input:focus { border-color: var(--primary); outline: none; }
+
+        .btn-action { width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: filter 0.2s; }
+        .btn-action:hover { filter: brightness(0.9); }
         .create-btn { background: var(--success); color: white; }
         .join-btn { background: var(--primary); color: white; }
-        #gameScreen { display: none; height: 100vh; flex-direction: row; }
-        .sidebar { width: 250px; background: var(--white); border-left: 4px solid var(--primary); display: flex; flex-direction: column; }
+
+        #gameScreen { display: none; height: 100vh; flex-direction: row; opacity: 0; }
+        #gameScreen.visible { display: flex; opacity: 1; }
+
+        /* السايدبار والدردشة المدمجة */
+        .sidebar { width: 280px; background: var(--white); border-left: 1px solid #ddd; display: flex; flex-direction: column; box-shadow: 2px 0 10px rgba(0,0,0,0.05); }
         .sidebar-header { padding: 15px; background: var(--primary); color: white; font-weight: bold; text-align: center; }
-        .player-list { flex-grow: 1; padding: 15px; overflow-y: auto; }
-        .player-card { background: #f1f2f6; padding: 10px; margin-bottom: 8px; border-radius: 8px; display: flex; justify-content: space-between; border-right: 4px solid #ccc; }
-        .main-play { flex-grow: 1; display: flex; flex-direction: column; align-items: center; padding: 20px; position: relative; }
-        .room-badge { position: absolute; top: 20px; right: 20px; background: #dfe6e9; padding: 5px 15px; border-radius: 20px; font-weight: bold; color: var(--primary); }
-        .buzzer-btn { width: 220px; height: 220px; background: var(--danger); color: white; border: none; border-radius: 50%; font-size: 2rem; font-weight: bold; box-shadow: 0 12px #b33939; cursor: pointer; transition: 0.1s; margin-top: 40px; }
-        .buzzer-btn:active { transform: translateY(8px); box-shadow: 0 4px #b33939; }
-        .buzzer-btn:disabled { background: #ccc; box-shadow: 0 8px #999; cursor: not-allowed; }
-        .rank-box { width: 100%; max-width: 450px; background: white; border-radius: 15px; padding: 20px; margin-top: 30px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-        .rank-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee; }
-        .btn-reset { padding: 15px 50px; background: var(--success); color: white; border: none; border-radius: 30px; font-weight: bold; cursor: pointer; margin-top: 20px; box-shadow: 0 4px #21a455; }
+        
+        .player-list { height: 40%; padding: 10px; overflow-y: auto; border-bottom: 1px solid #eee; }
+        .player-card { background: #f8f9fa; padding: 10px; margin-bottom: 5px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; animation: fadeIn 0.3s ease; }
+
+        /* صندوق الدردشة الجديد */
+        .chat-container { flex-grow: 1; display: flex; flex-direction: column; background: #fff; }
+        #chatMessages { flex-grow: 1; padding: 10px; overflow-y: auto; font-size: 0.9rem; }
+        .chat-msg { margin-bottom: 5px; padding: 5px 10px; border-radius: 5px; background: #f1f2f6; max-width: 90%; word-wrap: break-word; }
+        #chatInput { border: none; border-top: 1px solid #eee; padding: 10px; border-radius: 0; }
+
+        .main-play { flex-grow: 1; display: flex; flex-direction: column; align-items: center; padding: 20px; position: relative; overflow-y: auto; }
+        .room-badge { position: absolute; top: 20px; right: 20px; background: var(--accent); color: white; padding: 5px 15px; border-radius: 20px; font-weight: bold; }
+
+        /* زر البزر الاحترافي */
+        .buzzer-btn { width: 200px; height: 200px; background: var(--danger); color: white; border: none; border-radius: 50%; font-size: 1.8rem; font-weight: bold; box-shadow: 0 10px #b33939; cursor: pointer; transition: 0.1s; margin-top: 40px; z-index: 10; }
+        .buzzer-btn:active:not(:disabled) { transform: translateY(6px); box-shadow: 0 4px #b33939; }
+        .buzzer-btn:disabled { background: #dcdde1; box-shadow: 0 6px #7f8c8d; cursor: not-allowed; }
+
+        /* جدول النتائج */
+        .rank-box { width: 100%; max-width: 500px; background: white; border-radius: 15px; padding: 20px; margin-top: 30px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .rank-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #f1f2f6; animation: slideUp 0.3s ease; }
+
+        .points-badge { background: var(--success); color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.8rem; margin-right: 5px; }
+        .btn-point { background: var(--success); border: none; color: white; border-radius: 5px; cursor: pointer; padding: 2px 8px; margin-left: 5px; }
+
+        .btn-reset { padding: 12px 40px; background: var(--success); color: white; border: none; border-radius: 30px; font-weight: bold; cursor: pointer; margin-top: 20px; box-shadow: 0 4px #21a455; transition: 0.2s; }
+        .btn-reset:hover { transform: scale(1.05); }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
         .hidden { display: none !important; }
+
+        /* توافق الأجهزة الجوالة */
+        @media (max-width: 768px) {
+            #gameScreen { flex-direction: column; }
+            .sidebar { width: 100%; height: 200px; border-left: none; border-bottom: 4px solid var(--primary); }
+            .buzzer-btn { width: 160px; height: 160px; font-size: 1.4rem; }
+        }
     </style>
 </head>
 <body>
@@ -45,14 +86,18 @@
             <input type="text" id="roomCodeInput" placeholder="أدخل رمز الغرفة">
             <button class="btn-action join-btn" onclick="startApp('join')">دخول / انضمام</button>
             <div style="margin: 10px 0; color: #888;">أو</div>
-            <button class="btn-action create-btn" onclick="startApp('create')">إنشاء غرفة جديدة عشوائية</button>
+            <button class="btn-action create-btn" onclick="startApp('create')">إنشاء غرفة جديدة</button>
         </div>
     </div>
 
     <div id="gameScreen">
         <div class="sidebar">
-            <div class="sidebar-header">المتواجدون</div>
+            <div class="sidebar-header">المتواجدون والدردشة</div>
             <div id="playerList" class="player-list"></div>
+            <div class="chat-container">
+                <div id="chatMessages"></div>
+                <input type="text" id="chatInput" placeholder="اكتب رسالة واضغط Enter...">
+            </div>
         </div>
         <div class="main-play">
             <div id="roomDisplay" class="room-badge">غرفة: #----</div>
@@ -68,8 +113,11 @@
         </div>
     </div>
 
+    <audio id="audioBuzzer" src="https://assets.mixkit.co/active_storage/sfx/2958/2958-preview.mp3"></audio>
+    <audio id="audioReset" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
+
 <script>
-    // إعدادات Firebase الخاصة بك المدمجة
+    // إعدادات Firebase الخاصة بك
     const firebaseConfig = {
         apiKey: "AIzaSyCp3On2Z1xFeZrIQlOsQvsIoGHaGnFvmBw",
         authDomain: "buzzergame-f59e4.firebaseapp.com",
@@ -77,8 +125,7 @@
         databaseURL: "https://buzzergame-f59e4-default-rtdb.firebaseio.com/",
         storageBucket: "buzzergame-f59e4.firebasestorage.app",
         messagingSenderId: "833301631932",
-        appId: "1:833301631932:web:4dbe69851ec3d5125051b9",
-        measurementId: "G-MB3DWXL8NN"
+        appId: "1:833301631932:web:4dbe69851ec3d5125051b9"
     };
 
     firebase.initializeApp(firebaseConfig);
@@ -86,19 +133,27 @@
     let myName, myRole, myRoom;
 
     function startApp(mode) {
-        myName = document.getElementById('userName').value;
+        myName = document.getElementById('userName').value.trim();
         if(!myName) return alert("اكتب اسمك أولاً");
 
         if(mode === 'create') {
             myRoom = Math.floor(1000 + Math.random() * 9000).toString();
         } else {
-            myRoom = document.getElementById('roomCodeInput').value;
+            myRoom = document.getElementById('roomCodeInput').value.trim();
             if(!myRoom) return alert("أدخل رمز الغرفة");
         }
 
         myRole = document.getElementById('userRole').value;
-        document.getElementById('loginScreen').style.display = 'none';
-        document.getElementById('gameScreen').style.display = 'flex';
+        
+        // تأثير انتقال سلس
+        document.getElementById('loginScreen').style.opacity = '0';
+        setTimeout(() => {
+            document.getElementById('loginScreen').style.display = 'none';
+            const gs = document.getElementById('gameScreen');
+            gs.style.display = 'flex';
+            setTimeout(() => gs.classList.add('visible'), 50);
+        }, 500);
+
         document.getElementById('roomDisplay').innerText = "غرفة: #" + myRoom;
 
         if(myRole === 'admin') {
@@ -114,6 +169,7 @@
     }
 
     function listenToRoom() {
+        // الاستماع للاعبين
         db.ref(`rooms/${myRoom}/players`).on('value', snap => {
             const list = document.getElementById('playerList');
             list.innerHTML = "";
@@ -123,6 +179,7 @@
             });
         });
 
+        // الاستماع للضغطات وتحديث النتائج والنقاط
         db.ref(`rooms/${myRoom}/clicks`).on('value', snap => {
             const container = document.getElementById('rankContainer');
             if(!snap.exists()) {
@@ -132,20 +189,44 @@
                 return;
             }
             
-            let html = "";
             let clicks = [];
             snap.forEach(child => { clicks.push(child.val()); });
             clicks.sort((a, b) => a.time - b.time); 
             
-            clicks.forEach((c, index) => {
-                html += `<div class="rank-item"><span>${index+1}. ${c.name}</span><span>${((c.time - clicks[0].time)/1000).toFixed(2)}s+</span></div>`;
+            // جلب النقاط لعرضها
+            db.ref(`rooms/${myRoom}/scores`).once('value', scoreSnap => {
+                let scores = scoreSnap.val() || {};
+                let html = "";
+                clicks.forEach((c, index) => {
+                    let pCount = scores[c.name] || 0;
+                    html += `<div class="rank-item">
+                                <span><b>${index+1}. ${c.name}</b> <span class="points-badge">${pCount} ن</span></span>
+                                <span>
+                                    ${((c.time - clicks[0].time)/1000).toFixed(2)}s+
+                                    ${myRole=='admin' ? `<button class="btn-point" onclick="addPoint('${c.name}')">+1</button>` : ''}
+                                </span>
+                             </div>`;
+                });
+                container.innerHTML = html;
             });
-            container.innerHTML = html;
+        });
+
+        // الدردشة
+        db.ref(`rooms/${myRoom}/chat`).limitToLast(20).on('child_added', snap => {
+            const m = snap.val();
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'chat-msg';
+            msgDiv.innerHTML = `<b>${m.user}:</b> ${m.text}`;
+            const chatBox = document.getElementById('chatMessages');
+            chatBox.appendChild(msgDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
         });
     }
 
+    // وظائف اللعبة
     document.getElementById('mainBuzzer').onclick = function() {
         this.disabled = true;
+        document.getElementById('audioBuzzer').play();
         db.ref(`rooms/${myRoom}/clicks`).push({
             name: myName,
             time: firebase.database.ServerValue.TIMESTAMP
@@ -153,9 +234,25 @@
         document.getElementById('statusMsg').innerText = "تم تسجيل ضغطتك!";
     };
 
+    function addPoint(playerName) {
+        db.ref(`rooms/${myRoom}/scores/${playerName}`).transaction(current => (current || 0) + 1);
+    }
+
     function triggerReset() {
+        document.getElementById('audioReset').play();
         db.ref(`rooms/${myRoom}/clicks`).remove();
     }
+
+    // إرسال الدردشة
+    document.getElementById('chatInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && this.value.trim()) {
+            db.ref(`rooms/${myRoom}/chat`).push({
+                user: myName,
+                text: this.value.trim()
+            });
+            this.value = "";
+        }
+    });
 </script>
 </body>
 </html>
