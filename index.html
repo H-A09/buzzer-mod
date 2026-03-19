@@ -109,7 +109,7 @@
     <audio id="audioBuzzer" src="https://www.soundjay.com/buttons/sounds/button-37.mp3"></audio>
 
 <script>
-    // --- التحكم بالخلفية المحدثة ---
+    // --- التحكم بالخلفية ---
     let matrixEnabled = true;
     function toggleMatrix() {
         matrixEnabled = !matrixEnabled;
@@ -122,31 +122,26 @@
     canvas.width = window.innerWidth;
 
     const characters = ['?'];
-    const fontSize = 22; // تكبير الخط قليلاً ليكون أوضح
-    const columns = (canvas.width / fontSize) / 3; // زيادة المسافة بين الأعمدة (قسمة على 3 بدلاً من 2)
+    const fontSize = 18;
+    const columns = (canvas.width / fontSize) / 2; 
     const drops = [];
 
-    // توزيع البداية بشكل متباعد عمودياً أيضاً
-    for (let i = 0; i < columns; i++) { drops[i] = Math.random() * -150; }
+    for (let i = 0; i < columns; i++) { drops[i] = Math.random() * -100; }
 
     function drawMatrix() {
         if(!matrixEnabled) return;
-        ctx.fillStyle = 'rgba(15, 23, 42, 0.1)'; 
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.15)'; 
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = 'rgba(108, 92, 231, 0.15)'; 
-        
+        ctx.fillStyle = 'rgba(108, 92, 231, 0.2)'; 
         for (let i = 0; i < drops.length; i++) {
-            ctx.font = fontSize + 'px monospace';
-            // ضرب المسافة الأفقية بـ 3 لجعلها متباعدة
-            ctx.fillText(characters[0], i * (fontSize * 3.5), drops[i] * fontSize);
-            
+            const randomSize = fontSize + (Math.sin(i) * 6);
+            ctx.font = randomSize + 'px monospace';
+            ctx.fillText(characters[0], i * (fontSize * 2), drops[i] * fontSize);
             if (drops[i] * fontSize > canvas.height && Math.random() > 0.98) { drops[i] = 0; }
-            
-            // إبطاء السرعة (0.2 بدلاً من 0.5)
-            drops[i] += 0.2; 
+            drops[i] += 0.5; 
         }
     }
-    setInterval(drawMatrix, 60); // زيادة زمن التحديث قليلاً للمساعدة في الإبطاء
+    setInterval(drawMatrix, 50);
 
     window.addEventListener('resize', () => {
         canvas.height = window.innerHeight;
@@ -168,6 +163,7 @@
     const db = firebase.database();
     let myName, myRole, myRoom;
     
+    // حساب فرق التوقيت بين الجهاز والسيرفر لضمان العدالة
     let serverTimeOffset = 0;
     db.ref(".info/serverTimeOffset").on("value", (snap) => {
         serverTimeOffset = snap.val();
@@ -264,8 +260,14 @@
     document.getElementById('mainBuzzer').onclick = function() {
         this.disabled = true;
         document.getElementById('audioBuzzer').play();
+        
+        // حساب الوقت الحقيقي: وقت الجهاز الحالي + فرق السيرفر
         const accurateTime = Date.now() + serverTimeOffset;
-        db.ref(`rooms/${myRoom}/clicks`).push({ name: myName, time: accurateTime });
+        
+        db.ref(`rooms/${myRoom}/clicks`).push({ 
+            name: myName, 
+            time: accurateTime 
+        });
         document.getElementById('statusMsg').innerText = "تم!";
     };
 
