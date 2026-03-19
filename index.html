@@ -3,54 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minerva System </title>
+    <title>Minerva System 2.0</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     
     <style>
         :root { --primary: #6c5ce7; --bg: #0f172a; --white: #ffffff; --danger: #ff4757; --success: #2ed573; --card: #1e293b; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: white; margin: 0; overflow-x: hidden; }
-        
         #loginScreen { display: flex; align-items: center; justify-content: center; height: 100vh; }
-        .login-card { background: var(--card); padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); width: 90%; max-width: 350px; text-align: center; }
-
-        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #334155; border-radius: 10px; background: #0f172a; color: white; box-sizing: border-box; }
-        .btn-action { width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; }
+        .login-card { background: var(--card); padding: 30px; border-radius: 20px; width: 90%; max-width: 350px; text-align: center; }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #334155; border-radius: 10px; background: #0f172a; color: white; }
+        .btn-action { width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .create-btn { background: var(--success); color: white; }
         .join-btn { background: var(--primary); color: white; }
-
         #gameScreen { display: none; height: 100vh; flex-direction: column; }
-
-        .header-nav { width: 100%; background: var(--card); border-bottom: 2px solid var(--primary); display: flex; flex-direction: column; }
+        .header-nav { width: 100%; background: var(--card); border-bottom: 2px solid var(--primary); }
         .nav-top { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: var(--primary); }
-        
-        .player-list { display: flex; flex-direction: row; overflow-x: auto; padding: 10px; gap: 12px; background: #1e293b; scrollbar-width: none; }
+        .player-list { display: flex; overflow-x: auto; padding: 10px; gap: 12px; background: #1e293b; }
         .player-card { background: #0f172a; padding: 8px 15px; border-radius: 15px; border: 1px solid #334155; display: flex; align-items: center; gap: 10px; white-space: nowrap; }
-        
-        .score-box { display: flex; align-items: center; gap: 5px; background: var(--success); padding: 2px 8px; border-radius: 8px; font-weight: bold; }
-        .admin-controls { display: flex; gap: 5px; }
-        .btn-small { padding: 2px 6px; border: none; border-radius: 4px; cursor: pointer; font-size: 0.7rem; font-weight: bold; }
-
+        .score-box { background: var(--success); padding: 2px 8px; border-radius: 8px; font-weight: bold; }
         .main-play { flex-grow: 1; display: flex; flex-direction: column; align-items: center; padding: 15px; overflow-y: auto; }
         .buzzer-btn { width: 180px; height: 180px; background: var(--danger); color: white; border: none; border-radius: 50%; font-size: 1.6rem; font-weight: bold; box-shadow: 0 10px #b33939; cursor: pointer; margin: 20px 0; }
-        .buzzer-btn:active { transform: translateY(4px); box-shadow: 0 6px #b33939; }
         .buzzer-btn:disabled { background: #475569; box-shadow: none; transform: translateY(8px); }
-
-        .rank-box { width: 100%; max-width: 450px; background: var(--card); border-radius: 15px; padding: 15px; }
+        .rank-box { width: 100%; max-width: 450px; background: var(--card); border-radius: 15px; padding: 15px; margin-bottom: 10px; }
         .rank-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #334155; }
-
-        .chat-area { width: 100%; max-width: 450px; margin-top: 15px; background: var(--card); border-radius: 15px; height: 120px; display: flex; flex-direction: column; }
-        #chatMessages { flex-grow: 1; padding: 10px; overflow-y: auto; font-size: 0.85rem; }
-        #chatInput { border: none; border-top: 1px solid #334155; background: transparent; padding: 10px; color: white; }
-
-        .logout-btn { background: #ff4757; color: white; border: none; padding: 5px 12px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; }
+        .chat-area { width: 100%; max-width: 450px; background: var(--card); border-radius: 15px; height: 150px; display: flex; flex-direction: column; border: 1px solid #334155; }
+        #chatMessages { flex-grow: 1; padding: 10px; overflow-y: auto; font-size: 0.85rem; text-align: right; }
+        #chatInput { border: none; border-top: 1px solid #334155; background: #0f172a; padding: 12px; color: white; border-radius: 0 0 15px 15px; }
+        .hidden { display: none !important; }
+        .logout-btn { background: #ff4757; color: white; border: none; padding: 5px 12px; border-radius: 8px; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <div id="loginScreen">
         <div class="login-card">
-            <h2 style="color: var(--primary); margin-bottom: 20px;">MINERVA SYSTEM 2.0</h2>
+            <h2 style="color: var(--primary);">MINERVA SYSTEM 2.0</h2>
             <input type="text" id="userName" placeholder="اسمك المستعار">
             <select id="userRole">
                 <option value="player">أنا لاعب</option>
@@ -87,7 +75,7 @@
 
             <div class="chat-area">
                 <div id="chatMessages"></div>
-                <input type="text" id="chatInput" placeholder="اكتب رسالة...">
+                <input type="text" id="chatInput" placeholder="اكتب رسالة واضغط Enter...">
             </div>
         </div>
     </div>
@@ -109,14 +97,13 @@
     const db = firebase.database();
     let myName, myRole, myRoom;
 
-    // محاولة استعادة الجلسة عند التحديث
     window.onload = () => {
-        const savedData = localStorage.getItem('minerva_session');
-        if(savedData) {
-            const session = JSON.parse(savedData);
-            document.getElementById('userName').value = session.name;
-            document.getElementById('userRole').value = session.role;
-            document.getElementById('roomCodeInput').value = session.room;
+        const saved = localStorage.getItem('minerva_session');
+        if(saved) {
+            const s = JSON.parse(saved);
+            document.getElementById('userName').value = s.name;
+            document.getElementById('userRole').value = s.role;
+            document.getElementById('roomCodeInput').value = s.room;
             startApp('join', true);
         }
     };
@@ -124,17 +111,11 @@
     function startApp(mode, isAuto = false) {
         myName = document.getElementById('userName').value.trim();
         myRole = document.getElementById('userRole').value;
-        if(mode === 'create') {
-            myRoom = Math.floor(1000 + Math.random() * 9000).toString();
-        } else {
-            myRoom = document.getElementById('roomCodeInput').value.trim();
-        }
+        myRoom = (mode === 'create') ? Math.floor(1000 + Math.random() * 9000).toString() : document.getElementById('roomCodeInput').value.trim();
 
         if(!myName || !myRoom) return !isAuto && alert("تأكد من البيانات");
 
-        // حفظ الجلسة
         localStorage.setItem('minerva_session', JSON.stringify({name: myName, role: myRole, room: myRoom}));
-
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('gameScreen').style.display = 'flex';
         document.getElementById('roomDisplay').innerText = "غرفة: #" + myRoom;
@@ -144,11 +125,11 @@
             document.getElementById('adminResetArea').classList.remove('hidden');
         }
 
-        const playerRef = db.ref(`rooms/${myRoom}/players/${myName}`);
-        playerRef.set({ name: myName, role: myRole });
-        playerRef.onDisconnect().remove();
+        db.ref(`rooms/${myRoom}/players/${myName}`).set({ name: myName, role: myRole });
+        db.ref(`rooms/${myRoom}/players/${myName}`).onDisconnect().remove();
 
         listenToRoom();
+        listenToChat();
     }
 
     function listenToRoom() {
@@ -158,26 +139,23 @@
             const scores = data.scores || {};
             const clicks = data.clicks || {};
             
-            // قائمة اللاعبين مع نظام نقاط مستقل للأدمن
             const list = document.getElementById('playerList');
             list.innerHTML = "";
             Object.values(players).forEach(p => {
                 const pScore = scores[p.name] || 0;
-                let controls = (myRole === 'admin') ? `
-                    <div class="admin-controls">
-                        <button class="btn-small create-btn" onclick="modScore('${p.name}', 1)">+</button>
-                        <button class="btn-small logout-btn" onclick="modScore('${p.name}', -1)">-</button>
-                    </div>` : "";
+                let adminBtns = (myRole === 'admin') ? `
+                    <button style="background:var(--success); border:none; color:white; border-radius:4px; padding:2px 5px; cursor:pointer;" onclick="modScore('${p.name}', 1)">+</button>
+                    <button style="background:var(--danger); border:none; color:white; border-radius:4px; padding:2px 5px; cursor:pointer;" onclick="modScore('${p.name}', -1)">-</button>
+                ` : "";
                 
                 list.innerHTML += `
                     <div class="player-card">
                         <span>${p.role=='admin'?'👑':'🎮'} ${p.name} ${p.name==myName?'(أنت)':''}</span>
-                        <div class="score-box">🏆 ${pScore}</div>
-                        ${controls}
+                        <div class="score-box">${pScore}</div>
+                        ${adminBtns}
                     </div>`;
             });
 
-            // ترتيب الضغطات
             const container = document.getElementById('rankContainer');
             let clickArray = Object.values(clicks).sort((a, b) => a.time - b.time);
             
@@ -195,23 +173,24 @@
         });
     }
 
+    function listenToChat() {
+        const chatBox = document.getElementById('chatMessages');
+        db.ref(`rooms/${myRoom}/chat`).on('child_added', snap => {
+            const m = snap.val();
+            const msgDiv = document.createElement('div');
+            msgDiv.style.marginBottom = "5px";
+            msgDiv.innerHTML = `<b style="color:var(--primary)">${m.user}:</b> ${m.text}`;
+            chatBox.appendChild(msgDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        });
+    }
+
     document.getElementById('mainBuzzer').onclick = function() {
         this.disabled = true;
         document.getElementById('audioBuzzer').play();
         db.ref(`rooms/${myRoom}/clicks`).push({ name: myName, time: firebase.database.ServerValue.TIMESTAMP });
-        document.getElementById('statusMsg').innerText = "تم التسجيل!";
+        document.getElementById('statusMsg').innerText = "تم!";
     };
-
-    function modScore(target, val) {
-        db.ref(`rooms/${myRoom}/scores/${target}`).transaction(c => (c || 0) + val);
-    }
-
-    function triggerReset() { db.ref(`rooms/${myRoom}/clicks`).remove(); }
-
-    function logout() {
-        localStorage.removeItem('minerva_session');
-        location.reload();
-    }
 
     document.getElementById('chatInput').onkeypress = function(e) {
         if (e.key === 'Enter' && this.value.trim()) {
@@ -219,14 +198,10 @@
             this.value = "";
         }
     };
-    // عرض رسائل الشات
-    db.ref(`rooms/${myRoom}/chat`).limitToLast(10).on('child_added', snap => {
-        const m = snap.val();
-        const msg = document.createElement('div');
-        msg.innerHTML = `<b>${m.user}:</b> ${m.text}`;
-        document.getElementById('chatMessages').appendChild(msg);
-        document.getElementById('chatMessages').scrollTop = 9999;
-    });
+
+    function modScore(target, val) { db.ref(`rooms/${myRoom}/scores/${target}`).transaction(c => (c || 0) + val); }
+    function triggerReset() { db.ref(`rooms/${myRoom}/clicks`).remove(); }
+    function logout() { localStorage.removeItem('minerva_session'); location.reload(); }
 </script>
 </body>
 </html>
