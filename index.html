@@ -106,10 +106,12 @@
         </div>
     </div>
 
-    <audio id="audioBuzzer" src="https://www.soundjay.com/buttons/sounds/button-37.mp3"></audio>
+    <audio id="audioBuzzer" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3" type="audio/mpeg">
+    </audio>
 
 <script>
-    // --- التحكم بالخلفية ---
+    // --- التحكم بالخلفية (تمت إعادتها للحالة السابقة) ---
     let matrixEnabled = true;
     function toggleMatrix() {
         matrixEnabled = !matrixEnabled;
@@ -163,7 +165,6 @@
     const db = firebase.database();
     let myName, myRole, myRoom;
     
-    // حساب فرق التوقيت بين الجهاز والسيرفر لضمان العدالة
     let serverTimeOffset = 0;
     db.ref(".info/serverTimeOffset").on("value", (snap) => {
         serverTimeOffset = snap.val();
@@ -259,11 +260,13 @@
 
     document.getElementById('mainBuzzer').onclick = function() {
         this.disabled = true;
-        document.getElementById('audioBuzzer').play();
         
-        // حساب الوقت الحقيقي: وقت الجهاز الحالي + فرق السيرفر
+        // تشغيل الصوت
+        const audio = document.getElementById('audioBuzzer');
+        audio.currentTime = 0; // البدء من البداية
+        audio.play().catch(e => console.log("الصوت يحتاج تفاعل أولاً"));
+
         const accurateTime = Date.now() + serverTimeOffset;
-        
         db.ref(`rooms/${myRoom}/clicks`).push({ 
             name: myName, 
             time: accurateTime 
