@@ -14,22 +14,20 @@
         #matrixCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: var(--bg); transition: opacity 0.5s; }
         .toggle-matrix { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 5px 10px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; margin-left: 10px; }
 
-        /* --- تنسيق الشعار الشخصي الذكي --- */
         .user-logo-container {
             position: fixed;
             bottom: 20px;
             left: 20px;
-            z-index: 50; /* ليكون فوق الخلفية وتحت القوائم المنبثقة */
-            pointer-events: none; /* لا يعيق اللمس أو الضغط خلفه */
+            z-index: 50;
+            pointer-events: none;
         }
         .user-logo-container img {
-            width: 80px; /* الحجم الافتراضي للكمبيوتر */
+            width: 80px;
             height: auto;
             opacity: 0.9;
             filter: drop-shadow(0 0 8px rgba(108, 92, 231, 0.4));
             transition: all 0.3s ease;
         }
-        /* تعديل الحجم للجوال */
         @media (max-width: 600px) {
             .user-logo-container { bottom: 10px; left: 10px; }
             .user-logo-container img { width: 50px; opacity: 0.7; }
@@ -38,7 +36,7 @@
         #loginScreen { display: flex; align-items: center; justify-content: center; height: 100vh; position: relative; }
         .login-card { background: rgba(30, 41, 59, 0.9); padding: 30px; border-radius: 20px; width: 90%; max-width: 350px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #334155; }
         
-        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #334155; border-radius: 10px; background: #0f172a; color: white; }
+        input[type="text"], select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #334155; border-radius: 10px; background: #0f172a; color: white; box-sizing: border-box;}
         .btn-action { width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .create-btn { background: var(--success); color: white; }
         .join-btn { background: var(--primary); color: white; }
@@ -52,19 +50,23 @@
         
         .main-play { flex-grow: 1; display: flex; flex-direction: column; align-items: center; padding: 15px; overflow-y: auto; }
         .buzzer-btn { width: 180px; height: 180px; background: var(--danger); color: white; border: none; border-radius: 50%; font-size: 1.6rem; font-weight: bold; box-shadow: 0 10px #b33939; cursor: pointer; margin: 20px 0; z-index: 10; transition: transform 0.1s; }
-        .buzzer-btn:disabled { background: #475569; box-shadow: none; transform: translateY(8px); opacity: 0.7; }
+        .buzzer-btn:disabled { background: #475569; box-shadow: none; transform: translateY(8px); opacity: 0.7; cursor: not-allowed; }
 
         #countdownOverlay { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 9rem; font-weight: bold; color: var(--primary); text-shadow: 0 0 30px rgba(108, 92, 231, 0.5); z-index: 1000; display: none; pointer-events: none; }
         
         .rank-box { width: 100%; max-width: 450px; background: rgba(30, 41, 59, 0.85); border-radius: 15px; padding: 15px; margin-bottom: 10px; border: 1px solid #334155; }
         .rank-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #334155; }
         
-        .chat-area { width: 100%; max-width: 450px; background: rgba(30, 41, 59, 0.85); border-radius: 15px; height: 150px; display: flex; flex-direction: column; border: 1px solid #334155; }
+        .chat-area { width: 100%; max-width: 450px; background: rgba(30, 41, 59, 0.85); border-radius: 15px; height: 150px; display: flex; flex-direction: column; border: 1px solid #334155; box-sizing: border-box;}
         #chatMessages { flex-grow: 1; padding: 10px; overflow-y: auto; font-size: 0.85rem; text-align: right; }
-        #chatInput { border: none; border-top: 1px solid #334155; background: #0f172a; padding: 12px; color: white; border-radius: 0 0 15px 15px; }
+        #chatInput { border: none; border-top: 1px solid #334155; background: #0f172a; padding: 12px; color: white; border-radius: 0 0 15px 15px; width: 100%; box-sizing: border-box;}
         
         .hidden { display: none !important; }
         .logout-btn { background: #ff4757; color: white; border: none; padding: 5px 12px; border-radius: 8px; cursor: pointer; }
+
+        /* تنسيق قسم التحكم بالريسيت للمسؤول */
+        .toggle-container { background: rgba(0,0,0,0.3); padding: 10px; border-radius: 10px; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; border: 1px solid #334155;}
+        .toggle-container input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; accent-color: var(--primary); margin: 0; }
     </style>
 </head>
 <body>
@@ -112,7 +114,12 @@
             <div class="rank-box">
                 <strong>ترتيب الضغطات:</strong>
                 <div id="rankContainer">بانتظار المتسابقين...</div>
+                
                 <div id="adminResetArea" class="hidden" style="margin-top:15px; text-align:center;">
+                    <label class="toggle-container">
+                        <input type="checkbox" id="timerToggle" checked>
+                        <span>تفعيل مؤقت العد التنازلي (3 ثواني)</span>
+                    </label>
                     <button id="resetBtn" class="btn-action join-btn" onclick="triggerReset()">ريسيت للجولة 🔄</button>
                 </div>
             </div>
@@ -125,11 +132,12 @@
     </div>
 
 <script>
-    /* كود الـ JavaScript لم يتغير لضمان استقرار ميزات الأمان والعداد */
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     let isCountdownActive = false;
 
+    // نغمة ضغط الزر
     function playBuzzerSound() {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
         const now = audioCtx.currentTime;
         const osc1 = audioCtx.createOscillator();
         const gain1 = audioCtx.createGain();
@@ -137,24 +145,34 @@
         gain1.gain.setValueAtTime(0.3, now); gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
         osc1.connect(gain1); gain1.connect(audioCtx.destination);
         osc1.start(now); osc1.stop(now + 0.2);
-        const osc2 = audioCtx.createOscillator();
-        const gain2 = audioCtx.createGain();
-        osc2.type = 'triangle'; osc2.frequency.setValueAtTime(1046.50, now + 0.15);
-        gain2.gain.setValueAtTime(0.3, now + 0.15); gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
-        osc2.connect(gain2); gain2.connect(audioCtx.destination);
-        osc2.start(now + 0.15); osc2.stop(now + 0.4);
     }
 
-    function playResetSound() {
+    // نغمة الريسيت (في حال تشغيل المؤقت) - صوت تنبيه متصاعد
+    function playTimerResetSound() {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
         const now = audioCtx.currentTime;
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
-        osc.type = 'sine'; osc.frequency.setValueAtTime(200, now);
-        osc.frequency.exponentialRampToValueAtTime(800, now + 2); 
+        osc.type = 'sine'; osc.frequency.setValueAtTime(300, now);
+        osc.frequency.linearRampToValueAtTime(600, now + 1.5); 
         gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.2, now + 0.5);
         gain.gain.linearRampToValueAtTime(0, now + 2);
         osc.connect(gain); gain.connect(audioCtx.destination);
         osc.start(now); osc.stop(now + 2);
+    }
+
+    // نغمة الريسيت الفوري - صوت "بيب بيب" سريع وحاد
+    function playInstantResetSound() {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(700, now);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(now); osc.stop(now + 0.15);
     }
 
     let matrixEnabled = true;
@@ -230,7 +248,13 @@
     }
 
     function listenToRoom() {
-        db.ref(`rooms/${myRoom}/resetting`).on('value', snap => { if(snap.val()) startCountdownSequence(); });
+        // الاستماع لنوع الريسيت (بمؤقت أو فوري)
+        db.ref(`rooms/${myRoom}/resetType`).on('value', snap => { 
+            const type = snap.val();
+            if(type === 'timer') startCountdownSequence(); 
+            if(type === 'instant') executeInstantReset();
+        });
+
         db.ref(`rooms/${myRoom}`).on('value', snap => {
             const data = snap.val() || {};
             const players = data.players || {};
@@ -263,8 +287,7 @@
         const buzzer = document.getElementById('mainBuzzer');
         buzzer.disabled = true;
         overlay.style.display = 'block';
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        playResetSound();
+        playTimerResetSound();
         let count = 3;
         overlay.innerText = count;
         const interval = setInterval(() => {
@@ -272,6 +295,14 @@
             if(count > 0) { overlay.innerText = count; }
             else { clearInterval(interval); overlay.style.display = 'none'; isCountdownActive = false; if(myRole === 'player') buzzer.disabled = false; document.getElementById('statusMsg').innerText = "اضغط الآن!"; }
         }, 1000);
+    }
+
+    function executeInstantReset() {
+        isCountdownActive = false;
+        document.getElementById('countdownOverlay').style.display = 'none';
+        if(myRole === 'player') document.getElementById('mainBuzzer').disabled = false;
+        document.getElementById('statusMsg').innerText = "اضغط الآن!";
+        playInstantResetSound();
     }
 
     function listenToChat() {
@@ -287,7 +318,6 @@
     document.getElementById('mainBuzzer').onclick = function() {
         if(isCountdownActive) return;
         this.disabled = true;
-        if (audioCtx.state === 'suspended') audioCtx.resume();
         playBuzzerSound();
         db.ref(`rooms/${myRoom}/clicks`).push({ name: myName, time: Date.now() + serverTimeOffset });
         document.getElementById('statusMsg').innerText = "تم!";
@@ -295,7 +325,15 @@
 
     document.getElementById('chatInput').onkeypress = function(e) { if (e.key === 'Enter' && this.value.trim()) { db.ref(`rooms/${myRoom}/chat`).push({ user: myName, text: this.value.trim() }); this.value = ""; } };
     function modScore(target, val) { db.ref(`rooms/${myRoom}/scores/${target}`).transaction(c => (c || 0) + val); }
-    function triggerReset() { const roomRef = db.ref(`rooms/${myRoom}`); roomRef.update({ resetting: true, clicks: null }); setTimeout(() => roomRef.update({ resetting: false }), 1000); }
+    
+    // دالة الريسيت المحدثة بناءً على حالة زر التفعيل
+    function triggerReset() { 
+        const useTimer = document.getElementById('timerToggle').checked;
+        const roomRef = db.ref(`rooms/${myRoom}`); 
+        roomRef.update({ resetType: useTimer ? 'timer' : 'instant', clicks: null }); 
+        setTimeout(() => roomRef.update({ resetType: null }), 1000); 
+    }
+    
     function logout() { localStorage.removeItem('minerva_session'); location.reload(); }
 </script>
 </body>
