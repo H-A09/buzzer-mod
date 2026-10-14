@@ -121,6 +121,8 @@
                         <span>تفعيل مؤقت العد التنازلي (3 ثواني)</span>
                     </label>
                     <button id="resetBtn" class="btn-action join-btn" onclick="triggerReset()">ريسيت للجولة 🔄</button>
+                    <!-- ✅ زر مسح الغرفة بالكامل للمسؤول -->
+                    <button class="btn-action" style="background: var(--danger); margin-top: 5px;" onclick="clearRoomData()">مسح الغرفة بالكامل 🗑️</button>
                 </div>
             </div>
 
@@ -234,14 +236,32 @@
         myRole = document.getElementById('userRole').value;
         myRoom = (mode === 'create') ? Math.floor(1000 + Math.random() * 9000).toString() : document.getElementById('roomCodeInput').value.trim();
         if(!myName || !myRoom) return !isAuto && alert("تأكد من البيانات");
+        
         localStorage.setItem('minerva_session', JSON.stringify({name: myName, role: myRole, room: myRoom}));
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('gameScreen').style.display = 'flex';
         document.getElementById('roomDisplay').innerText = "غرفة: #" + myRoom;
+        
         if(myRole === 'admin') {
             document.getElementById('playerUI').style.display = 'none';
             document.getElementById('adminResetArea').classList.remove('hidden');
         }
+
+        // ✅ [إضافة جديدة] كود التنظيف التلقائي عند الدخول (Clean on Join)
+        const roomRef = db.ref(`rooms/${myRoom}`);
+        roomRef.child('players').once('value', (snapshot) => {
+            // إذا الغرفة ما فيها أي لاعب (يعني كلهم خرجوا)
+            if (!snapshot.exists() || snapshot.numChildren() === 0) {
+                console.log("الغرفة فاضية، جاري تصفير البيانات القديمة...");
+                roomRef.update({
+                    chat: null,       // مسح الرسائل
+                    clicks: null,     // مسح ترتيب الضغطات
+                    scores: null,     // مسح النقاط
+                    resetType: null   // تصفير حالة الريسيت
+                });
+            }
+        });
+
         db.ref(`rooms/${myRoom}/players/${myName}`).set({ name: myName, role: myRole });
         db.ref(`rooms/${myRoom}/players/${myName}`).onDisconnect().remove();
         listenToRoom(); listenToChat();
@@ -332,6 +352,21 @@
         const roomRef = db.ref(`rooms/${myRoom}`); 
         roomRef.update({ resetType: useTimer ? 'timer' : 'instant', clicks: null }); 
         setTimeout(() => roomRef.update({ resetType: null }), 1000); 
+    }
+
+    // ✅ [إضافة جديدة] دالة مسح الغرفة بالكامل (للمسؤول فقط)
+    function clearRoomData() {
+        if (confirm("هل أنت متأكد من مسح جميع البيانات (الرسائل، النقاط، الترتيب)؟")) {
+            const roomRef = db.ref(`rooms/${myRoom}`);
+            roomRef.update({
+                chat: null,
+                clicks: null,
+                scores: null,
+                resetType: null
+            });
+            // تفريغ الشات في الواجهة
+            document.getElementById('chatMessages').innerHTML = "";
+        }
     }
     
     function logout() { localStorage.removeItem('minerva_session'); location.reload(); }
