@@ -14,20 +14,8 @@
         #matrixCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: var(--bg); transition: opacity 0.5s; }
         .toggle-matrix { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 5px 10px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; margin-left: 10px; }
 
-        .user-logo-container {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            z-index: 50;
-            pointer-events: none;
-        }
-        .user-logo-container img {
-            width: 80px;
-            height: auto;
-            opacity: 0.9;
-            filter: drop-shadow(0 0 8px rgba(108, 92, 231, 0.4));
-            transition: all 0.3s ease;
-        }
+        .user-logo-container { position: fixed; bottom: 20px; left: 20px; z-index: 50; pointer-events: none; }
+        .user-logo-container img { width: 80px; height: auto; opacity: 0.9; filter: drop-shadow(0 0 8px rgba(108, 92, 231, 0.4)); transition: all 0.3s ease; }
         @media (max-width: 600px) {
             .user-logo-container { bottom: 10px; left: 10px; }
             .user-logo-container img { width: 50px; opacity: 0.7; }
@@ -64,7 +52,6 @@
         .hidden { display: none !important; }
         .logout-btn { background: #ff4757; color: white; border: none; padding: 5px 12px; border-radius: 8px; cursor: pointer; }
 
-        /* تنسيق قسم التحكم بالريسيت للمسؤول */
         .toggle-container { background: rgba(0,0,0,0.3); padding: 10px; border-radius: 10px; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; border: 1px solid #334155;}
         .toggle-container input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; accent-color: var(--primary); margin: 0; }
     </style>
@@ -121,7 +108,6 @@
                         <span>تفعيل مؤقت العد التنازلي (3 ثواني)</span>
                     </label>
                     <button id="resetBtn" class="btn-action join-btn" onclick="triggerReset()">ريسيت للجولة 🔄</button>
-                    <!-- ✅ زر مسح الغرفة بالكامل للمسؤول -->
                     <button class="btn-action" style="background: var(--danger); margin-top: 5px;" onclick="clearRoomData()">مسح الغرفة بالكامل 🗑️</button>
                 </div>
             </div>
@@ -137,7 +123,6 @@
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     let isCountdownActive = false;
 
-    // نغمة ضغط الزر
     function playBuzzerSound() {
         if (audioCtx.state === 'suspended') audioCtx.resume();
         const now = audioCtx.currentTime;
@@ -149,7 +134,6 @@
         osc1.start(now); osc1.stop(now + 0.2);
     }
 
-    // نغمة الريسيت (في حال تشغيل المؤقت) - صوت تنبيه متصاعد
     function playTimerResetSound() {
         if (audioCtx.state === 'suspended') audioCtx.resume();
         const now = audioCtx.currentTime;
@@ -163,7 +147,6 @@
         osc.start(now); osc.stop(now + 2);
     }
 
-    // نغمة الريسيت الفوري - صوت "بيب بيب" سريع وحاد
     function playInstantResetSound() {
         if (audioCtx.state === 'suspended') audioCtx.resume();
         const now = audioCtx.currentTime;
@@ -217,8 +200,6 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     let myName, myRole, myRoom;
-    let serverTimeOffset = 0;
-    db.ref(".info/serverTimeOffset").on("value", (snap) => { serverTimeOffset = snap.val(); });
 
     window.onload = () => {
         const saved = localStorage.getItem('minerva_session');
@@ -247,18 +228,10 @@
             document.getElementById('adminResetArea').classList.remove('hidden');
         }
 
-        // ✅ [إضافة جديدة] كود التنظيف التلقائي عند الدخول (Clean on Join)
         const roomRef = db.ref(`rooms/${myRoom}`);
         roomRef.child('players').once('value', (snapshot) => {
-            // إذا الغرفة ما فيها أي لاعب (يعني كلهم خرجوا)
             if (!snapshot.exists() || snapshot.numChildren() === 0) {
-                console.log("الغرفة فاضية، جاري تصفير البيانات القديمة...");
-                roomRef.update({
-                    chat: null,       // مسح الرسائل
-                    clicks: null,     // مسح ترتيب الضغطات
-                    scores: null,     // مسح النقاط
-                    resetType: null   // تصفير حالة الريسيت
-                });
+                roomRef.update({ chat: null, clicks: null, scores: null, resetType: null });
             }
         });
 
@@ -268,7 +241,6 @@
     }
 
     function listenToRoom() {
-        // الاستماع لنوع الريسيت (بمؤقت أو فوري)
         db.ref(`rooms/${myRoom}/resetType`).on('value', snap => { 
             const type = snap.val();
             if(type === 'timer') startCountdownSequence(); 
@@ -335,18 +307,18 @@
         });
     }
 
+    // ⚡ هنا تم التعديل: فايربيس هو اللي يحدد الوقت بدلاً من الجهاز
     document.getElementById('mainBuzzer').onclick = function() {
         if(isCountdownActive) return;
         this.disabled = true;
         playBuzzerSound();
-        db.ref(`rooms/${myRoom}/clicks`).push({ name: myName, time: Date.now() + serverTimeOffset });
+        db.ref(`rooms/${myRoom}/clicks`).push({ name: myName, time: firebase.database.ServerValue.TIMESTAMP });
         document.getElementById('statusMsg').innerText = "تم!";
     };
 
     document.getElementById('chatInput').onkeypress = function(e) { if (e.key === 'Enter' && this.value.trim()) { db.ref(`rooms/${myRoom}/chat`).push({ user: myName, text: this.value.trim() }); this.value = ""; } };
     function modScore(target, val) { db.ref(`rooms/${myRoom}/scores/${target}`).transaction(c => (c || 0) + val); }
     
-    // دالة الريسيت المحدثة بناءً على حالة زر التفعيل
     function triggerReset() { 
         const useTimer = document.getElementById('timerToggle').checked;
         const roomRef = db.ref(`rooms/${myRoom}`); 
@@ -354,17 +326,10 @@
         setTimeout(() => roomRef.update({ resetType: null }), 1000); 
     }
 
-    // ✅ [إضافة جديدة] دالة مسح الغرفة بالكامل (للمسؤول فقط)
     function clearRoomData() {
         if (confirm("هل أنت متأكد من مسح جميع البيانات (الرسائل، النقاط، الترتيب)؟")) {
             const roomRef = db.ref(`rooms/${myRoom}`);
-            roomRef.update({
-                chat: null,
-                clicks: null,
-                scores: null,
-                resetType: null
-            });
-            // تفريغ الشات في الواجهة
+            roomRef.update({ chat: null, clicks: null, scores: null, resetType: null });
             document.getElementById('chatMessages').innerHTML = "";
         }
     }
