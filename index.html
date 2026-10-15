@@ -43,7 +43,6 @@
         #countdownOverlay { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 9rem; font-weight: bold; color: var(--primary); text-shadow: 0 0 30px rgba(108, 92, 231, 0.5); z-index: 1000; display: none; pointer-events: none; }
         
         .rank-box { width: 100%; max-width: 450px; background: rgba(30, 41, 59, 0.85); border-radius: 15px; padding: 15px; margin-bottom: 10px; border: 1px solid #334155; }
-        .rank-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #334155; }
         
         .chat-area { width: 100%; max-width: 450px; background: rgba(30, 41, 59, 0.85); border-radius: 15px; height: 150px; display: flex; flex-direction: column; border: 1px solid #334155; box-sizing: border-box;}
         #chatMessages { flex-grow: 1; padding: 10px; overflow-y: auto; font-size: 0.85rem; text-align: right; }
@@ -98,9 +97,11 @@
                 <button id="mainBuzzer" class="buzzer-btn">اضغط!</button>
             </div>
 
-            <div class="rank-box">
-                <strong>ترتيب الضغطات:</strong>
-                <div id="rankContainer">بانتظار المتسابقين...</div>
+            <!-- ✅ صندوق الفائز الجديد -->
+            <div class="rank-box" id="winnerBox">
+                <div id="winnerDisplay" style="text-align: center; padding: 20px;">
+                    <p style="font-size: 0.95rem; color: #94a3b8; margin: 0;">🎯 في انتظار الضغط...</p>
+                </div>
                 
                 <div id="adminResetArea" class="hidden" style="margin-top:15px; text-align:center;">
                     <label class="toggle-container">
@@ -259,16 +260,23 @@
                 let adminBtns = (myRole === 'admin') ? `<button style="background:var(--success); border:none; color:white; border-radius:4px; padding:2px 5px; cursor:pointer;" onclick="modScore('${p.name}', 1)">+</button><button style="background:var(--danger); border:none; color:white; border-radius:4px; padding:2px 5px; cursor:pointer;" onclick="modScore('${p.name}', -1)">-</button>` : "";
                 list.innerHTML += `<div class="player-card"><span>${p.role=='admin'?'👑':'🎮'} ${p.name}</span><div class="score-box">${pScore}</div>${adminBtns}</div>`;
             });
-            const container = document.getElementById('rankContainer');
+
+            // ✅ عرض الفائز فقط بدل لوحة الترتيب
+            const winnerDisplay = document.getElementById('winnerDisplay');
             let clickArray = Object.values(clicks).sort((a, b) => a.time - b.time);
+            
             if(clickArray.length === 0) {
-                container.innerHTML = "بانتظار الضغط...";
+                winnerDisplay.innerHTML = '<p style="font-size: 0.95rem; color: #94a3b8; margin: 0;">🎯 في انتظار الضغط...</p>';
                 if(!isCountdownActive) document.getElementById('mainBuzzer').disabled = false;
                 document.getElementById('statusMsg').innerText = "استعد!";
             } else {
-                let html = "";
-                clickArray.forEach((c, i) => { html += `<div class="rank-item"><span>${i+1}. ${c.name}</span><span>${i==0?"الأول!":"+"+((c.time-clickArray[0].time)/1000).toFixed(3)+"s"}</span></div>`; });
-                container.innerHTML = html;
+                const winner = clickArray[0];
+                winnerDisplay.innerHTML = `
+                    <div style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 8px; letter-spacing: 2px;">🏆 الفائز 🏆</div>
+                    <div style="font-size: 2.2rem; font-weight: bold; color: var(--success); text-shadow: 0 0 25px rgba(46, 213, 115, 0.6); margin: 10px 0;">${winner.name}</div>
+                    <div style="font-size: 0.8rem; color: #64748b;">⚡ وصل أولاً</div>
+                `;
+                document.getElementById('statusMsg').innerText = "انتهت الجولة!";
             }
         });
     }
@@ -307,7 +315,6 @@
         });
     }
 
-    // ⚡ هنا تم التعديل: فايربيس هو اللي يحدد الوقت بدلاً من الجهاز
     document.getElementById('mainBuzzer').onclick = function() {
         if(isCountdownActive) return;
         this.disabled = true;
